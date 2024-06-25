@@ -11,7 +11,7 @@ export const authentication = async (req: Request, res: Response, next: NextFunc
     const [bearer, token] = authHeader.split(' ')
     if (bearer !== 'Bearer' || !token) throw new Error('Invalid token format')
     jwt.verify(token, appConfig.secret.accessKey, async (err, payload: any) => {
-      if (err) return res.formatter.forbidden({})
+      if (err) return res.formatter.forbidden({ data: err })
       const userFound = await UserSchema.findOne({ where: { id: payload.userID } })
       if (!userFound) return res.formatter.notFound({ message: `User not found!` })
       if (userFound.status === 'pending') return res.formatter.badRequest({ message: `Please verify your account!` })

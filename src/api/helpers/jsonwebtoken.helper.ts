@@ -9,7 +9,7 @@ const refreshToken = appConfig.secret.refreshKey
 
 export const generateToken = (payload: string | object | Buffer, secretType: SecretType): string => {
   const token = jwt.sign(payload, secretType === 'access_token' ? accessToken : refreshToken, {
-    expiresIn: secretType === 'access_token' ? '1h' : '7d',
+    expiresIn: secretType === 'access_token' ? '1d' : '7d',
     algorithm: 'HS256'
   })
   return token

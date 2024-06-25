@@ -21,6 +21,7 @@ export const generateAndSaveTokens = async (userID: number) => {
     const accessToken = generateToken({ userID }, 'access_token')
     const refreshToken = generateToken({ userID }, 'refresh_token')
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7Days
+    // const expiresAt = dateNow() // 7Days
     const tokenFound = await TokenSchema.findOne({
       where: {
         userID
