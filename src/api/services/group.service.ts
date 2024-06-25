@@ -1,103 +1,77 @@
+import { getItemsQuery } from '~/helpers/query'
 import GroupSchema, { Group } from '~/models/group.model'
-import { ItemStatusType, RequestBodyType } from '~/type'
-import logging from '~/utils/logging'
-import { dynamicQuery } from '../helpers/query'
+import { RequestBodyType } from '~/type'
 
 const NAMESPACE = 'services/group'
 
-export const createNewItem = async (item: Group): Promise<GroupSchema> => {
+export const createNewItem = async (item: Group) => {
   try {
-    return await GroupSchema.create({ ...item })
+    const newItem = await GroupSchema.create(item)
+    return newItem
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error creating item: ${error.message}`)
   }
 }
 
 // Get by id
-export const getItemByPk = async (id: number): Promise<GroupSchema | null> => {
+export const getItemByPk = async (id: number) => {
   try {
-    return await GroupSchema.findByPk(id)
+    const itemFound = await GroupSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    return itemFound
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-export const getItemBy = async (item: Group): Promise<GroupSchema | null> => {
-  try {
-    return await GroupSchema.findOne({ where: { ...item } })
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error getting item: ${error.message}`)
   }
 }
 
 // Get all
-export const getItems = async (body: RequestBodyType): Promise<{ count: number; rows: GroupSchema[] }> => {
+export const getItems = async (body: RequestBodyType) => {
   try {
-    console.log(dynamicQuery<Group>(body))
-    const items = await GroupSchema.findAndCountAll({
-      offset: (Number(body.paginator.page) - 1) * Number(body.paginator.pageSize),
-      limit: body.paginator.pageSize === -1 ? undefined : body.paginator.pageSize,
-      order: [[body.sorting.column, body.sorting.direction]],
-      where: dynamicQuery<Group>(body)
-    })
+    const items = await GroupSchema.findAndCountAll(getItemsQuery(body))
     return items
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw `Error getting list: ${error.message}`
   }
 }
 
-export const getItemsWithStatus = async (status: ItemStatusType): Promise<GroupSchema[]> => {
+// Update
+export const updateItemByPk = async (id: number, itemToUpdate: Group) => {
   try {
-    return await GroupSchema.findAll({
-      where: {
-        status: status
-      }
-    })
+    const itemFound = await GroupSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.update(itemToUpdate)
+    return itemToUpdate
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error updating item: ${error.message}`)
   }
 }
 
-export const getItemsCount = async (): Promise<number> => {
+export const updateItems = async (itemsUpdate: Group[]) => {
   try {
-    return await GroupSchema.count()
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-// Update by productID
-export const updateItemByPk = async (id: number, item: Group): Promise<Group | undefined> => {
-  try {
-    const affectedRows = await GroupSchema.update(
-      {
-        ...item
-      },
-      {
-        where: {
-          id: id
+    const updatedItems = await Promise.all(
+      itemsUpdate.map(async (item) => {
+        const user = await GroupSchema.findByPk(item.id)
+        if (!user) {
+          throw new Error(`Item with id ${item.id} not found`)
         }
-      }
+        await user.update(item)
+        return user
+      })
     )
-    return affectedRows[0] > 0 ? item : undefined
+    return updatedItems
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw `Error updating multiple item: ${error.message}`
   }
 }
 
-// Delete importedID
-export const deleteItemByPk = async (id: number): Promise<number> => {
+// Delete
+export const deleteItemByPk = async (id: number) => {
   try {
-    return await GroupSchema.destroy({ where: { id: id } })
+    const itemFound = await GroupSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.destroy()
+    return { message: 'Deleted successfully' }
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error deleting item: ${error.message}`)
   }
 }

@@ -1,152 +1,41 @@
 import { Router } from 'express'
-import GarmentAccessoryNoteController from '~/controllers/garment-accessory-note.controller'
-import { validationRules } from '../middleware/request-validator'
+import * as controller from '~/controllers/garment-accessory-note.controller'
+import validationRules from '~/middleware/request-validator'
 
-class GarmentAccessoryNoteRoute {
-  router = Router()
-  controller = new GarmentAccessoryNoteController()
+const router = Router()
 
-  constructor() {
-    this.initialize()
-  }
+router.post(
+  '/',
+  validationRules([
+    { field: 'productID', type: 'int', location: 'body' },
+    { field: 'accessoryNoteID', type: 'int', location: 'body' },
+    { field: 'garmentAccessoryID', type: 'int', location: 'body' },
+    { field: 'noteStatus', type: 'string', location: 'body' }
+  ]),
+  controller.createNewItem
+)
 
-  private initialize() {
-    // Create new item
-    this.router.post(
-      '/',
-      validationRules([
-        { field: 'productID', fieldType: 'int', location: 'body' },
-        { field: 'accessoryNoteID', fieldType: 'int', location: 'body' },
-        { field: 'garmentAccessoryID', fieldType: 'int', location: 'body' }
-      ]),
-      this.controller.createNewItem
-    )
+// Get item by productID and importedID
+router.get('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.getItemByPk)
 
-    this.router.post('/items', this.controller.createNewItems)
+// Get all items
+router.post(
+  '/find',
+  validationRules([
+    { field: 'filter', type: 'object', location: 'body' },
+    { field: 'paginator', type: 'object', location: 'body' },
+    { field: 'search', type: 'object', location: 'body' },
+    { field: 'sorting', type: 'object', location: 'body' }
+  ]),
+  controller.getItems
+)
 
-    this.router.post(
-      '/createOrUpdate/:id',
-      validationRules([
-        { field: 'id', fieldType: 'int', location: 'params' },
-        { field: 'productID', fieldType: 'int', location: 'body' },
-        { field: 'accessoryNoteID', fieldType: 'int', location: 'body' },
-        { field: 'garmentAccessoryID', fieldType: 'int', location: 'body' }
-      ]),
-      this.controller.createOrUpdateItemByPk
-    )
+router.put('/', controller.updateItems)
 
-    this.router.post(
-      '/createOrUpdate/productID/:productID',
-      validationRules([
-        { field: 'productID', fieldType: 'int', location: 'params' },
-        { field: 'accessoryNoteID', fieldType: 'int', location: 'body' },
-        { field: 'garmentAccessoryID', fieldType: 'int', location: 'body' }
-      ]),
-      this.controller.createOrUpdateItemByProductID
-    )
+// Update item by productID and importedID
+router.patch('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.updateItemByPk)
 
-    this.router.post(
-      '/updateItems/productID/:productID',
-      validationRules([{ field: 'productID', fieldType: 'int', location: 'params' }]),
-      this.controller.updateItemsByProductID
-    )
+// Delete item by productID
+router.delete('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.deleteItemByPk)
 
-    // Get item
-    this.router.get(
-      '/:id',
-      validationRules([{ field: 'id', fieldType: 'int', location: 'params' }]),
-      this.controller.getItemByPk
-    )
-
-    this.router.get(
-      '/productID/:productID',
-      validationRules([{ field: 'productID', fieldType: 'int', location: 'params' }]),
-      this.controller.getItemByProductID
-    )
-
-    this.router.get(
-      '/accessoryNoteID/:accessoryNoteID',
-      validationRules([{ field: 'accessoryNoteID', fieldType: 'int', location: 'params' }]),
-      this.controller.getItemByAccessoryNoteID
-    )
-
-    this.router.get(
-      '/garmentAccessoryID/:garmentAccessoryID',
-      validationRules([{ field: 'garmentAccessoryID', fieldType: 'int', location: 'params' }]),
-      this.controller.getItemByGarmentAccessoryID
-    )
-
-    // Get items
-    this.router.post(
-      '/find',
-      validationRules([
-        { field: 'filter', fieldType: 'object', location: 'body' },
-        { field: 'paginator', fieldType: 'object', location: 'body' },
-        { field: 'search', fieldType: 'object', location: 'body' },
-        { field: 'sorting', fieldType: 'object', location: 'body' }
-      ]),
-      this.controller.getItems
-    )
-
-    // Update item by id
-    this.router.put(
-      '/:id',
-      validationRules([{ field: 'id', fieldType: 'int', location: 'params' }]),
-      this.controller.updateItemByPk
-    )
-
-    this.router.put(
-      '/productID/:productID',
-      validationRules([{ field: 'productID', fieldType: 'int', location: 'params' }]),
-      this.controller.updateItemByProductID
-    )
-
-    this.router.put(
-      '/accessoryNoteID/:accessoryNoteID',
-      validationRules([{ field: 'accessoryNoteID', fieldType: 'int', location: 'params' }]),
-      this.controller.updateItemByAccessoryNoteID
-    )
-
-    this.router.put(
-      '/garmentAccessoryID/:garmentAccessoryID',
-      validationRules([{ field: 'garmentAccessoryID', fieldType: 'int', location: 'params' }]),
-      this.controller.updateItemByGarmentAccessoryID
-    )
-
-    this.router.post(
-      '/updateItems/productID/:productID',
-      validationRules([
-        { field: 'productID', fieldType: 'int', location: 'params' },
-        { field: 'garmentAccessoryNotes', fieldType: 'array', location: 'body' }
-      ]),
-      this.controller.updateItemsByProductID
-    )
-
-    // Delete item
-    this.router.delete(
-      '/:id',
-      validationRules([{ field: 'id', fieldType: 'int', location: 'params' }]),
-      this.controller.deleteItemByPk
-    )
-
-    this.router.delete(
-      '/productID/:productID',
-      validationRules([{ field: 'productID', fieldType: 'int', location: 'params' }]),
-      this.controller.deleteItemByProductID
-    )
-
-    this.router.delete(
-      '/accessoryNoteID/:accessoryNoteID',
-      validationRules([{ field: 'accessoryNoteID', fieldType: 'int', location: 'params' }]),
-      this.controller.deleteItemByAccessoryNoteID
-    )
-
-    this.router.delete(
-      '/garmentAccessoryID/:garmentAccessoryID',
-      validationRules([{ field: 'garmentAccessoryID', fieldType: 'int', location: 'params' }]),
-      this.controller.deleteItemByGarmentAccessoryID
-    )
-  }
-}
-
-export default new GarmentAccessoryNoteRoute().router
+export default router

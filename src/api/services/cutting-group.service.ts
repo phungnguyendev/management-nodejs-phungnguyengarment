@@ -1,135 +1,77 @@
-import { ItemStatusType, RequestBodyType } from '~/type'
-import logging from '~/utils/logging'
-import { dynamicQuery } from '../helpers/query'
-import CuttingGroupSchema, { CuttingGroup } from '../models/cutting-group.model'
-import ProductSchema, { Product } from '../models/product.model'
+import { getItemsQuery } from '~/helpers/query'
+import CuttingGroupSchema, { CuttingGroup } from '~/models/cutting-group.model'
+import { RequestBodyType } from '~/type'
 
 const NAMESPACE = 'services/cutting-group'
 
-export const createNewItem = async (item: CuttingGroup): Promise<CuttingGroupSchema> => {
+export const createNewItem = async (item: CuttingGroup) => {
   try {
-    return await CuttingGroupSchema.create({ ...item })
+    const newItem = await CuttingGroupSchema.create(item)
+    return newItem
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error creating item: ${error.message}`)
   }
 }
 
 // Get by id
-export const getItemByPk = async (id: number): Promise<CuttingGroupSchema | null> => {
+export const getItemByPk = async (id: number) => {
   try {
-    return await CuttingGroupSchema.findByPk(id, { include: [{ model: ProductSchema, as: 'product' }] })
+    const itemFound = await CuttingGroupSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    return itemFound
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-export const getItemBy = async (item: CuttingGroup): Promise<CuttingGroupSchema | null> => {
-  try {
-    return await CuttingGroupSchema.findOne({ where: { ...item }, include: [{ model: ProductSchema, as: 'product' }] })
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error getting item: ${error.message}`)
   }
 }
 
 // Get all
-export const getItems = async (body: RequestBodyType): Promise<{ count: number; rows: CuttingGroupSchema[] }> => {
+export const getItems = async (body: RequestBodyType) => {
   try {
-    const items = await CuttingGroupSchema.findAndCountAll({
-      offset: (Number(body.paginator.page) - 1) * Number(body.paginator.pageSize),
-      limit: body.paginator.pageSize === -1 ? undefined : body.paginator.pageSize,
-      order: [[body.sorting.column, body.sorting.direction]],
-      where: dynamicQuery<Product>(body),
-      include: [{ model: ProductSchema, as: 'product' }]
-    })
+    const items = await CuttingGroupSchema.findAndCountAll(getItemsQuery(body))
     return items
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw `Error getting list: ${error.message}`
   }
 }
 
-export const getItemsWithStatus = async (status: ItemStatusType): Promise<CuttingGroupSchema[]> => {
+// Update
+export const updateItemByPk = async (id: number, itemToUpdate: CuttingGroup) => {
   try {
-    return await CuttingGroupSchema.findAll({
-      where: {
-        status: status
-      }
-    })
+    const itemFound = await CuttingGroupSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.update(itemToUpdate)
+    return itemToUpdate
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error updating item: ${error.message}`)
   }
 }
 
-export const getItemsCount = async (): Promise<number> => {
+export const updateItems = async (itemsUpdate: CuttingGroup[]) => {
   try {
-    return await CuttingGroupSchema.count()
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-// Update by productID
-export const updateItemByProductID = async (
-  productID: number,
-  itemToUpdate: CuttingGroup
-): Promise<CuttingGroup | undefined> => {
-  try {
-    const affectedRows = await CuttingGroupSchema.update(
-      {
-        ...itemToUpdate
-      },
-      {
-        where: {
-          productID: productID
+    const updatedItems = await Promise.all(
+      itemsUpdate.map(async (item) => {
+        const user = await CuttingGroupSchema.findByPk(item.id)
+        if (!user) {
+          throw new Error(`Item with id ${item.id} not found`)
         }
-      }
+        await user.update(item)
+        return user
+      })
     )
-    return affectedRows[0] > 0 ? itemToUpdate : undefined
+    return updatedItems
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw `Error updating multiple item: ${error.message}`
   }
 }
 
-export const updateItemByPk = async (id: number, itemToUpdate: CuttingGroup): Promise<CuttingGroup | undefined> => {
+// Delete
+export const deleteItemByPk = async (id: number) => {
   try {
-    const affectedRows = await CuttingGroupSchema.update(
-      {
-        ...itemToUpdate
-      },
-      {
-        where: {
-          id: id
-        }
-      }
-    )
-    return affectedRows[0] > 0 ? itemToUpdate : undefined
+    const itemFound = await CuttingGroupSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.destroy()
+    return { message: 'Deleted successfully' }
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-// Delete importedID
-export const deleteItemByProductID = async (productID: number): Promise<number> => {
-  try {
-    return await CuttingGroupSchema.destroy({ where: { productID: productID } })
-  } catch (error: any) {
-    logging.error(NAMESPACE, `Error deleteItemByProductID :: ${error}`)
-    throw new Error(`deleteItemByProductID :: ${error}`)
-  }
-}
-
-export const deleteItemByPk = async (id: number): Promise<number> => {
-  try {
-    return await CuttingGroupSchema.destroy({ where: { id: id } })
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error deleting item: ${error.message}`)
   }
 }

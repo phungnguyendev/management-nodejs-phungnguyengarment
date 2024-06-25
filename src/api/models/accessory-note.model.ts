@@ -5,8 +5,8 @@ const { INTEGER, STRING } = DataType
 
 export type AccessoryNote = {
   id?: number
-  title?: string
-  summary?: string
+  title?: string | null
+  summary?: string | null
   status?: ItemStatusType
 }
 

@@ -7,14 +7,14 @@ const { INTEGER, STRING, DATE } = DataType
 export type SampleSewing = {
   id?: number
   productID?: number
-  dateSubmissionNPL?: string
-  dateApprovalSO?: string
-  dateApprovalPP?: string
-  dateSubmissionFirstTime?: string
-  dateSubmissionSecondTime?: string
-  dateSubmissionThirdTime?: string
-  dateSubmissionForthTime?: string
-  dateSubmissionFifthTime?: string
+  dateSubmissionNPL?: string | null
+  dateApprovalSO?: string | null
+  dateApprovalPP?: string | null
+  dateSubmissionFirstTime?: string | null
+  dateSubmissionSecondTime?: string | null
+  dateSubmissionThirdTime?: string | null
+  dateSubmissionForthTime?: string | null
+  dateSubmissionFifthTime?: string | null
   status?: ItemStatusType
 }
 

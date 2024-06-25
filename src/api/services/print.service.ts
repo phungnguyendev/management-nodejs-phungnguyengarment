@@ -1,102 +1,77 @@
+import { getItemsQuery } from '~/helpers/query'
 import PrintSchema, { Print } from '~/models/print.model'
-import { ItemStatusType, RequestBodyType } from '~/type'
-import logging from '~/utils/logging'
-import { dynamicQuery } from '../helpers/query'
+import { RequestBodyType } from '~/type'
 
 const NAMESPACE = 'services/print'
 
-export const createNewItem = async (item: Print): Promise<PrintSchema> => {
+export const createNewItem = async (item: Print) => {
   try {
-    return await PrintSchema.create({ ...item })
+    const newItem = await PrintSchema.create(item)
+    return newItem
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error creating item: ${error.message}`)
   }
 }
 
 // Get by id
-export const getItemByPk = async (id: number): Promise<PrintSchema | null> => {
+export const getItemByPk = async (id: number) => {
   try {
-    return await PrintSchema.findByPk(id)
+    const itemFound = await PrintSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    return itemFound
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-export const getItemBy = async (item: Print): Promise<PrintSchema | null> => {
-  try {
-    return await PrintSchema.findOne({ where: { ...item } })
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error getting item: ${error.message}`)
   }
 }
 
 // Get all
-export const getItems = async (body: RequestBodyType): Promise<{ count: number; rows: PrintSchema[] }> => {
+export const getItems = async (body: RequestBodyType) => {
   try {
-    const items = await PrintSchema.findAndCountAll({
-      offset: (Number(body.paginator.page) - 1) * Number(body.paginator.pageSize),
-      limit: body.paginator.pageSize === -1 ? undefined : body.paginator.pageSize,
-      order: [[body.sorting.column, body.sorting.direction]],
-      where: dynamicQuery<Print>(body)
-    })
+    const items = await PrintSchema.findAndCountAll(getItemsQuery(body))
     return items
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw `Error getting list: ${error.message}`
   }
 }
 
-export const getItemsWithStatus = async (status: ItemStatusType): Promise<PrintSchema[]> => {
+// Update
+export const updateItemByPk = async (id: number, itemToUpdate: Print) => {
   try {
-    return await PrintSchema.findAll({
-      where: {
-        status: status
-      }
-    })
+    const itemFound = await PrintSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.update(itemToUpdate)
+    return itemToUpdate
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error updating item: ${error.message}`)
   }
 }
 
-export const getItemsCount = async (): Promise<number> => {
+export const updateItems = async (itemsUpdate: Print[]) => {
   try {
-    return await PrintSchema.count()
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-// Update by productID
-export const updateItemByPk = async (id: number, item: Print): Promise<Print | undefined> => {
-  try {
-    const affectedRows = await PrintSchema.update(
-      {
-        ...item
-      },
-      {
-        where: {
-          id: id
+    const updatedItems = await Promise.all(
+      itemsUpdate.map(async (item) => {
+        const user = await PrintSchema.findByPk(item.id)
+        if (!user) {
+          throw new Error(`Item with id ${item.id} not found`)
         }
-      }
+        await user.update(item)
+        return user
+      })
     )
-    return affectedRows[0] > 0 ? item : undefined
+    return updatedItems
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw `Error updating multiple item: ${error.message}`
   }
 }
 
-// Delete importedID
-export const deleteItemByPk = async (id: number): Promise<number> => {
+// Delete
+export const deleteItemByPk = async (id: number) => {
   try {
-    return await PrintSchema.destroy({ where: { id: id } })
+    const itemFound = await PrintSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.destroy()
+    return { message: 'Deleted successfully' }
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error deleting item: ${error.message}`)
   }
 }

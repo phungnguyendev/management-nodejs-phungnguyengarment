@@ -7,9 +7,9 @@ const { INTEGER, STRING, BOOLEAN, FLOAT, DATE } = DataType
 export type GarmentAccessory = {
   id?: number
   productID?: number
-  amountCutting?: number
-  passingDeliveryDate?: string
-  syncStatus?: boolean
+  amountCutting?: number | null
+  passingDeliveryDate?: string | null
+  syncStatus?: boolean | null
   status?: ItemStatusType
 }
 

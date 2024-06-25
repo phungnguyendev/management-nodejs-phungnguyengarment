@@ -1,220 +1,77 @@
-import { dynamicQuery } from '~/helpers/query'
-import ColorSchema from '~/models/color.model'
+import { getItemsQuery } from '~/helpers/query'
 import ProductColorSchema, { ProductColor } from '~/models/product-color.model'
-import ProductSchema from '~/models/product.model'
-import { ItemStatusType, RequestBodyType } from '~/type'
-import logging from '~/utils/logging'
+import { RequestBodyType } from '~/type'
 
 const NAMESPACE = 'services/product-color'
 
-export const createNewItem = async (item: ProductColor): Promise<ProductColorSchema> => {
+export const createNewItem = async (item: ProductColor) => {
   try {
-    return await ProductColorSchema.create(
-      { ...item },
-      {
-        include: [
-          { model: ProductSchema, as: 'product' },
-          { model: ColorSchema, as: 'color' }
-        ]
-      }
-    )
+    const newItem = await ProductColorSchema.create(item)
+    return newItem
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${NAMESPACE} ${error}`)
+    throw new Error(`Error creating item: ${error.message}`)
   }
 }
 
 // Get by id
-export const getItemByPk = async (id: number): Promise<ProductColorSchema | null> => {
+export const getItemByPk = async (id: number) => {
   try {
-    const item = await ProductColorSchema.findByPk(id, {
-      include: [
-        { model: ProductSchema, as: 'product' },
-        { model: ColorSchema, as: 'color' }
-      ]
-    })
-    return item
+    const itemFound = await ProductColorSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    return itemFound
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-// Get by id
-export const getItemBy = async (product: ProductColor): Promise<ProductColorSchema | null> => {
-  try {
-    const item = await ProductColorSchema.findOne({
-      where: { ...product },
-      include: [
-        { model: ProductSchema, as: 'product' },
-        { model: ColorSchema, as: 'color' }
-      ]
-    })
-    return item
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${NAMESPACE} ${error}`)
+    throw new Error(`Error getting item: ${error.message}`)
   }
 }
 
 // Get all
-export const getItems = async (body: RequestBodyType): Promise<{ count: number; rows: ProductColorSchema[] }> => {
+export const getItems = async (body: RequestBodyType) => {
   try {
-    const items = await ProductColorSchema.findAndCountAll({
-      offset: (Number(body.paginator.page) - 1) * Number(body.paginator.pageSize),
-      limit: body.paginator.pageSize === -1 ? undefined : body.paginator.pageSize,
-      order: [[body.sorting.column, body.sorting.direction]],
-      where: dynamicQuery<ProductColor>(body),
-      include: [
-        { model: ProductSchema, as: 'product' },
-        { model: ColorSchema, as: 'color' }
-      ]
-    })
+    const items = await ProductColorSchema.findAndCountAll(getItemsQuery(body))
     return items
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${NAMESPACE} ${error}`)
-  }
-}
-
-export const getItemsWithStatus = async (status: ItemStatusType): Promise<ProductColorSchema[]> => {
-  try {
-    const items = await ProductColorSchema.findAll({
-      where: {
-        status: status
-      }
-    })
-    return items
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-export const getItemsCount = async (): Promise<number> => {
-  try {
-    return await ProductSchema.count()
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${NAMESPACE} ${error}`)
+    throw `Error getting list: ${error.message}`
   }
 }
 
 // Update
-export const updateItemByPk = async (
-  id: number,
-  itemToUpdate: ProductColor
-): Promise<ProductColor | ProductColorSchema | ProductColorSchema[] | undefined> => {
+export const updateItemByPk = async (id: number, itemToUpdate: ProductColor) => {
   try {
-    const updatedCount = await ProductColorSchema.update(
-      {
-        ...itemToUpdate
-      },
-      {
-        where: {
-          id: id
-        }
-      }
-    )
-    return updatedCount[0] > 0 ? itemToUpdate : undefined
+    const itemFound = await ProductColorSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.update(itemToUpdate)
+    return itemToUpdate
   } catch (error: any) {
-    logging.error(NAMESPACE, `Error updateItemByPk :: ${error}`)
-    throw new Error(`updateItemByPk :: ${error}`)
+    throw new Error(`Error updating item: ${error.message}`)
   }
 }
 
-export const updateItemBy = async (
-  query: { field: string; id: number },
-  itemToUpdate: ProductColor
-): Promise<ProductColor | ProductColorSchema | ProductColorSchema[] | undefined> => {
+export const updateItems = async (itemsUpdate: ProductColor[]) => {
   try {
-    const updatedCount = await ProductColorSchema.update(
-      {
-        ...itemToUpdate
-      },
-      {
-        where: {
-          [query.field]: query.id
+    const updatedItems = await Promise.all(
+      itemsUpdate.map(async (item) => {
+        const user = await ProductColorSchema.findByPk(item.id)
+        if (!user) {
+          throw new Error(`Item with id ${item.id} not found`)
         }
-      }
+        await user.update(item)
+        return user
+      })
     )
-    return updatedCount[0] > 0 ? itemToUpdate : undefined
+    return updatedItems
   } catch (error: any) {
-    logging.error(NAMESPACE, `Error updateItemByProductID :: ${error}`)
-    throw new Error(`updateItemByProductID :: ${error}`)
-  }
-}
-
-export const createOrUpdateItemByPk = async (
-  id: number,
-  item: ProductColor
-): Promise<ProductColor | ProductColorSchema | ProductColorSchema[] | undefined> => {
-  try {
-    const getItem = await ProductColorSchema.findByPk(id)
-    if (getItem) {
-      const updatedCount = await ProductColorSchema.update(
-        {
-          ...item
-        },
-        {
-          where: {
-            id: id
-          }
-        }
-      )
-      return updatedCount[0] > 0 ? item : undefined
-    } else {
-      return await ProductColorSchema.create({ ...item })
-    }
-  } catch (error: any) {
-    logging.error(NAMESPACE, `Error createOrUpdateItemByPk :: ${error}`)
-    throw new Error(`createOrUpdateItemByPk :: ${error}`)
-  }
-}
-
-export const createOrUpdateItemBy = async (
-  query: { field: string; id: number },
-  item: ProductColor
-): Promise<ProductColor | ProductColorSchema | undefined> => {
-  try {
-    const affectedRows = await ProductColorSchema.update(
-      {
-        ...item
-      },
-      {
-        where: {
-          [query.field]: query.id
-        }
-      }
-    )
-    if (affectedRows[0] > 0) {
-      return item
-    } else {
-      return await ProductColorSchema.create({ ...item, [query.field]: query.id })
-    }
-  } catch (error: any) {
-    logging.error(NAMESPACE, `Error createOrUpdateItemByProductID :: ${error}`)
-    throw new Error(`createOrUpdateItemByProductID :: ${error}`)
+    throw `Error updating multiple item: ${error.message}`
   }
 }
 
 // Delete
-export const deleteItemByPk = async (id: number): Promise<number> => {
+export const deleteItemByPk = async (id: number) => {
   try {
-    const affectedRows = await ProductColorSchema.destroy({ where: { id: id } })
-    return affectedRows
+    const itemFound = await ProductColorSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.destroy()
+    return { message: 'Deleted successfully' }
   } catch (error: any) {
-    logging.error(NAMESPACE, `Error deleteItemByPk :: ${error}`)
-    throw new Error(`deleteItemByPk :: ${error}`)
-  }
-}
-
-export const deleteItemBy = async (query: { field: string; id: number }): Promise<number> => {
-  try {
-    const affectedRows = await ProductColorSchema.destroy({ where: { [query.field]: query.id } })
-    return affectedRows
-  } catch (error: any) {
-    logging.error(NAMESPACE, `Error deleteItemByColorID :: ${error}`)
-    throw new Error(`deleteItemByColorID :: ${error}`)
+    throw new Error(`Error deleting item: ${error.message}`)
   }
 }

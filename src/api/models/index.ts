@@ -1,4 +1,5 @@
 import { Sequelize } from 'sequelize-typescript'
+import appConfig from '~/config/app.config'
 import databaseConfig from '~/config/database.config'
 import logging from '~/utils/logging'
 import AccessoryNoteSchema from './accessory-note.model'
@@ -18,6 +19,7 @@ import RoleSchema from './role.model'
 import SampleSewingSchema from './sample-sewing.model'
 import SewingLineDeliverySchema from './sewing-line-delivery.model'
 import SewingLineSchema from './sewing-line.model'
+import TokenSchema from './token.model'
 import UserRoleSchema from './user-role.model'
 import UserSchema from './user.model'
 
@@ -27,6 +29,7 @@ const sequelize = new Sequelize(databaseConfig)
 
 sequelize?.addModels([
   UserSchema,
+  TokenSchema,
   RoleSchema,
   UserRoleSchema,
   ColorSchema,
@@ -51,7 +54,21 @@ sequelize
   .authenticate()
   .then(async () => {
     // Check admin exist
-    const userExist = await UserSchema.count()
+    if (appConfig.admin.mail) {
+      const admin = await UserSchema.findOne({ where: { email: appConfig.admin.mail } })
+      if (!admin) {
+        await UserSchema.create({
+          email: appConfig.admin.mail,
+          password: appConfig.admin.password,
+          fullName: appConfig.admin.full_name,
+          phone: appConfig.admin.phone,
+          avatar: appConfig.admin.avatar,
+          workDescription: 'Administrators',
+          status: 'active',
+          isAdmin: true
+        })
+      }
+    }
     logging.info(PATH, 'Connection has been established successfully. 🥳🎉')
   })
   .catch((error) => logging.error(PATH, `Unable to connect to the database: ${error}`))

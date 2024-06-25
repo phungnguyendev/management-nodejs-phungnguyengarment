@@ -5,8 +5,8 @@ const { INTEGER, STRING } = DataType
 
 export type Color = {
   id?: number
-  name?: string
-  hexColor?: string
+  name?: string | null
+  hexColor?: string | null
   status?: ItemStatusType
 }
 

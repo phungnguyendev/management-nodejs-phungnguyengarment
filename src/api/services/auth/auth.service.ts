@@ -1,59 +1,73 @@
 /* eslint-disable no-unreachable */
-import * as bcrypt from 'bcrypt'
-import UserSchema, { User } from '~/models/user.model'
-import * as services from '~/services/user.service'
-import logging from '~/utils/logging'
+import { otpGenerator } from '~/api/utils'
+import { mailOptionVerifyOTPCode, transporter } from '~/config/nodemailer.config'
+import UserSchema from '~/models/user.model'
+import * as tokenService from '~/services/auth/token.service'
 
 const NAMESPACE = 'Auth'
 const PATH = 'services/auth'
 
-export const registerUser = async (user: User): Promise<UserSchema | null> => {
+export const login = async (email: string, password: string) => {
   try {
-    /**
-     * Checking user is already existing in the database
-     * If user is already existing => send request "User already exists"
-     * If user not found => Create new user
-     */
-    const userFind = await services.getItemBy({ email: user.email })
-    if (userFind) {
-      return null
-    } else {
-      const salt = bcrypt.genSaltSync(10)
-      const hashedPassword = bcrypt.hashSync(user.password!, salt)
-      const newUser = await services.createNewItem({ ...user, password: hashedPassword })
-
-      if (newUser) {
-        return newUser
-      } else {
-        return null
+    const userFound = await UserSchema.findOne({
+      where: {
+        email
       }
-    }
+    })
+    if (!userFound) throw new Error(`User not found!`)
+    if (password !== userFound.password) throw new Error(`Invalid password!`)
+    const { accessToken, refreshToken } = await tokenService.generateAndSaveTokens(userFound.id)
+    if (userFound.otp) await userFound.update({ otp: null })
+    delete userFound.dataValues.password
+    return { ...userFound.dataValues, accessToken, refreshToken }
   } catch (error: any) {
-    logging.error(NAMESPACE, `Error register ${NAMESPACE} :: ${error}`)
-    throw new Error(`Register ${NAMESPACE} :: ${error}`)
+    throw new Error(`Error login: ${error.message}`)
   }
 }
 
-export const loginUser = async (email: string, password: string): Promise<UserSchema | null | any> => {
+export const verifyEmailAndSendOTP = async (email: string) => {
   try {
-    const userFind = await services.getItemBy({ email: email })
-    if (userFind) {
-      const passwordCompare = bcrypt.compareSync(password, userFind.password)
-      if (passwordCompare) {
-        // Generate token
-        const userReturned = { ...userFind.toJSON() }
-        delete userReturned.password
-        return {
-          user: userReturned
-        }
-      } else {
-        return null
+    const userFound = await UserSchema.findOne({
+      where: {
+        email
       }
-    } else {
-      return null
-    }
+    })
+    if (!userFound) throw new Error(`User not found!`)
+    if (userFound.status === 'deleted') throw new Error(`Người dùng đã bị xoá!`)
+    const otp = otpGenerator()
+    await transporter
+      .sendMail(mailOptionVerifyOTPCode(email, otp))
+      .then(() => {
+        userFound.update({ otp: otp })
+      })
+      .catch((err) => {
+        throw new Error(err)
+      })
+    return { otp }
   } catch (error: any) {
-    logging.error(PATH, `Error login ${NAMESPACE} :: ${error}`)
-    throw new Error(`Login ${NAMESPACE} :: ${error}`)
+    throw new Error(`Error send otp code: ${error.message}`)
+  }
+}
+
+export const verifyOTPCode = async (email: string, otp: string) => {
+  try {
+    const userFound = await UserSchema.findOne({
+      where: {
+        email
+      }
+    })
+    if (!userFound) throw new Error(`User not found!`)
+    if (userFound.status === 'active') throw new Error(`The user has been authenticated!`)
+    if (userFound.status === 'deleted') throw new Error(`User has been deleted!`)
+    if (!userFound.otp) throw new Error(`There was an error during authentication, please try again!`)
+    if (userFound.otp !== otp) throw new Error(`The OTP code is incorrect, please try again!`)
+    if (userFound.otp === otp) {
+      if (userFound.status === 'pending') userFound.update({ status: 'active' })
+      userFound.update({ otp: null })
+    }
+    delete userFound.dataValues.password
+    return userFound
+  } catch (error: any) {
+    throw new Error(`Error verify otp code: ${error.message}`)
   }
 }

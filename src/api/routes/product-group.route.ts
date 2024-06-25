@@ -1,116 +1,39 @@
 import { Router } from 'express'
-import ProductGroupController from '~/controllers/product-group.controller'
-import { validationRules } from '../middleware/request-validator'
+import * as controller from '~/controllers/product-group.controller'
+import validationRules from '~/middleware/request-validator'
 
-class ProductGroupRoute {
-  router = Router()
-  controller = new ProductGroupController()
+const router = Router()
 
-  constructor() {
-    this.initialize()
-  }
+router.post(
+  '/',
+  validationRules([
+    { field: 'groupID', type: 'int', location: 'body' },
+    { field: 'productID', type: 'int', location: 'body' }
+  ]),
+  controller.createNewItem
+)
 
-  private initialize() {
-    // Create new item
-    this.router.post(
-      '/',
-      validationRules([
-        { field: 'productID', fieldType: 'int', location: 'body' },
-        { field: 'groupID', fieldType: 'int', location: 'body' }
-      ]),
-      this.controller.createNewItem
-    )
+// Get item by productID and importedID
+router.get('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.getItemByPk)
 
-    this.router.post(
-      '/createOrUpdate/:id',
-      validationRules([
-        { field: 'id', fieldType: 'int', location: 'params' },
-        { field: 'productID', fieldType: 'int', location: 'body' },
-        { field: 'groupID', fieldType: 'int', location: 'body' }
-      ]),
-      this.controller.createOrUpdateItemByPk
-    )
+// Get all items
+router.post(
+  '/find',
+  validationRules([
+    { field: 'filter', type: 'object', location: 'body' },
+    { field: 'paginator', type: 'object', location: 'body' },
+    { field: 'search', type: 'object', location: 'body' },
+    { field: 'sorting', type: 'object', location: 'body' }
+  ]),
+  controller.getItems
+)
 
-    this.router.post(
-      '/createOrUpdate/productID/:productID',
-      validationRules([
-        { field: 'productID', fieldType: 'int', location: 'params' },
-        { field: 'groupID', fieldType: 'int', location: 'body' }
-      ]),
-      this.controller.createOrUpdateItemByProductID
-    )
+router.put('/', controller.updateItems)
 
-    // Get item
-    this.router.get(
-      '/:id',
-      validationRules([{ field: 'id', fieldType: 'int', location: 'params' }]),
-      this.controller.getItemByPk
-    )
+// Update item by productID and importedID
+router.patch('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.updateItemByPk)
 
-    // Get item
-    this.router.get(
-      '/productID/:productID',
-      validationRules([{ field: 'productID', fieldType: 'int', location: 'params' }]),
-      this.controller.getItemByProductID
-    )
+// Delete item by productID
+router.delete('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.deleteItemByPk)
 
-    // Get item
-    this.router.get(
-      '/groupID/:groupID',
-      validationRules([{ field: 'groupID', fieldType: 'int', location: 'params' }]),
-      this.controller.getItemByGroupID
-    )
-
-    // Get all items
-    this.router.post(
-      '/find',
-      validationRules([
-        { field: 'filter', fieldType: 'object', location: 'body' },
-        { field: 'paginator', fieldType: 'object', location: 'body' },
-        { field: 'search', fieldType: 'object', location: 'body' },
-        { field: 'sorting', fieldType: 'object', location: 'body' }
-      ]),
-      this.controller.getItems
-    )
-
-    // Update item by productID and importedID
-    this.router.put(
-      '/:id',
-      validationRules([{ field: 'id', fieldType: 'int', location: 'params' }]),
-      this.controller.updateItemByPk
-    )
-
-    this.router.put(
-      '/productID/:productID',
-      validationRules([{ field: 'productID', fieldType: 'int', location: 'params' }]),
-      this.controller.updateItemByProductID
-    )
-
-    this.router.put(
-      '/groupID/:groupID',
-      validationRules([{ field: 'groupID', fieldType: 'int', location: 'params' }]),
-      this.controller.updateItemByGroupID
-    )
-
-    // Delete item by productID
-    this.router.delete(
-      '/:id',
-      validationRules([{ field: 'id', fieldType: 'int', location: 'params' }]),
-      this.controller.deleteItemByPk
-    )
-
-    this.router.delete(
-      '/productID/:productID',
-      validationRules([{ field: 'productID', fieldType: 'int', location: 'params' }]),
-      this.controller.deleteItemByProductID
-    )
-
-    this.router.delete(
-      '/groupID/:groupID',
-      validationRules([{ field: 'groupID', fieldType: 'int', location: 'params' }]),
-      this.controller.deleteItemByGroupID
-    )
-  }
-}
-
-export default new ProductGroupRoute().router
+export default router

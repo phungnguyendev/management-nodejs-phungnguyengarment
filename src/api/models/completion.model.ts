@@ -7,11 +7,11 @@ const { INTEGER, STRING, BOOLEAN, FLOAT, DATE } = DataType
 export type Completion = {
   id?: number
   productID?: number
-  quantityIroned?: number
-  quantityCheckPassed?: number
-  quantityPackaged?: number
-  exportedDate?: string
-  passFIDate?: string
+  quantityIroned?: number | null
+  quantityCheckPassed?: number | null
+  quantityPackaged?: number | null
+  exportedDate?: string | null
+  passFIDate?: string | null
   status?: ItemStatusType
 }
 

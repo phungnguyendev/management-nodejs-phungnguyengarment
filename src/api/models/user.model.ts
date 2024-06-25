@@ -5,17 +5,16 @@ const { INTEGER, STRING, BOOLEAN } = DataType
 
 export interface User {
   id?: number
-  fullName?: string
-  email?: string
-  password?: string
-  avatar?: string
-  phone?: string
-  otp?: string | null
-  appPassword?: string
-  workDescription?: string
-  birthday?: string
+  fullName?: string | null
+  email?: string | null
+  password?: string | null
+  avatar?: string | null
+  phone?: string | null
+  otp?: string | null | null
+  isAdmin?: boolean | null
+  workDescription?: string | null
+  birthday?: string | null
   status?: ItemStatusType
-  accessToken?: string
 }
 
 @Table({
@@ -45,17 +44,14 @@ export default class UserSchema extends Model<User> {
   @Column({ type: STRING, field: 'otp' })
   declare otp: string
 
-  @Column({ type: STRING, field: 'app_password' })
-  declare appPassword: string
+  @Column({ type: BOOLEAN, field: 'is_admin' })
+  declare isAdmin: boolean
 
   @Column({ type: STRING, field: 'work_description' })
   declare workDescription: string
 
   @Column({ type: STRING, field: 'birthday' })
   declare birthday: string
-
-  @Column({ type: STRING, field: 'access_token' })
-  declare accessToken: string
 
   @Column({ type: STRING, field: 'status' })
   declare status: ItemStatusType

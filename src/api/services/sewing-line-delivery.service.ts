@@ -1,287 +1,77 @@
+import { getItemsQuery } from '~/helpers/query'
 import SewingLineDeliverySchema, { SewingLineDelivery } from '~/models/sewing-line-delivery.model'
-import { ItemStatusType, RequestBodyType } from '~/type'
-import logging from '~/utils/logging'
-import { dynamicQuery } from '../helpers/query'
-import ProductSchema from '../models/product.model'
-import SewingLineSchema from '../models/sewing-line.model'
+import { RequestBodyType } from '~/type'
 
 const NAMESPACE = 'services/sewing-line-delivery'
 
-export const createNewItem = async (item: SewingLineDelivery): Promise<SewingLineDeliverySchema> => {
+export const createNewItem = async (item: SewingLineDelivery) => {
   try {
-    return await SewingLineDeliverySchema.create({ ...item })
+    const newItem = await SewingLineDeliverySchema.create(item)
+    return newItem
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw `${error.message}`
-  }
-}
-
-export const createNewItems = async (items: SewingLineDelivery[]): Promise<SewingLineDeliverySchema[]> => {
-  try {
-    return await SewingLineDeliverySchema.bulkCreate(items)
-  } catch (error: any) {
-    logging.error(NAMESPACE, `Error createNewItems :: ${error}`)
-    throw `${NAMESPACE} createNewItems :: ${error}`
+    throw new Error(`Error creating item: ${error.message}`)
   }
 }
 
 // Get by id
-export const getItemByPk = async (id: number): Promise<SewingLineDeliverySchema | null> => {
+export const getItemByPk = async (id: number) => {
   try {
-    const item = await SewingLineDeliverySchema.findByPk(id, {
-      include: [
-        { model: SewingLineSchema, as: 'sewingLine' },
-        { model: ProductSchema, as: 'product' }
-      ]
-    })
-    return item
+    const itemFound = await SewingLineDeliverySchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    return itemFound
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw `${error.message}`
-  }
-}
-
-export const getItemBy = async (sewingLineDelivery: SewingLineDelivery): Promise<SewingLineDeliverySchema | null> => {
-  try {
-    const item = await SewingLineDeliverySchema.findOne({
-      where: { ...sewingLineDelivery },
-      include: [
-        { model: SewingLineSchema, as: 'sewingLine' },
-        { model: ProductSchema, as: 'product' }
-      ]
-    })
-    return item
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw `${error.message}`
+    throw new Error(`Error getting item: ${error.message}`)
   }
 }
 
 // Get all
-export const getItems = async (body: RequestBodyType): Promise<{ count: number; rows: SewingLineDeliverySchema[] }> => {
+export const getItems = async (body: RequestBodyType) => {
   try {
-    const items = await SewingLineDeliverySchema.findAndCountAll({
-      offset: (Number(body.paginator.page) - 1) * Number(body.paginator.pageSize),
-      limit: body.paginator.pageSize === -1 ? undefined : body.paginator.pageSize,
-      order: [[body.sorting.column, body.sorting.direction]],
-      where: dynamicQuery<SewingLineDelivery>(body),
-      include: [
-        { model: SewingLineSchema, as: 'sewingLine' },
-        { model: ProductSchema, as: 'product' }
-      ]
-    })
+    const items = await SewingLineDeliverySchema.findAndCountAll(getItemsQuery(body))
     return items
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw `${error.message}`
+    throw `Error getting list: ${error.message}`
   }
 }
 
-export const getItemsWithStatus = async (status: ItemStatusType): Promise<SewingLineDeliverySchema[]> => {
+// Update
+export const updateItemByPk = async (id: number, itemToUpdate: SewingLineDelivery) => {
   try {
-    const items = await SewingLineDeliverySchema.findAll({
-      where: {
-        status: status
-      }
-    })
-    return items
+    const itemFound = await SewingLineDeliverySchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.update(itemToUpdate)
+    return itemToUpdate
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw `${error.message}`
+    throw new Error(`Error updating item: ${error.message}`)
   }
 }
 
-export const getItemsCount = async (): Promise<number> => {
+export const updateItems = async (itemsUpdate: SewingLineDelivery[]) => {
   try {
-    return await SewingLineDeliverySchema.count()
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw `${error.message}`
-  }
-}
-
-export const updateItemsBy = async (
-  query: { field: string; id: number },
-  newRecords: SewingLineDelivery[]
-): Promise<SewingLineDelivery[] | undefined | any> => {
-  try {
-    const existingRecords = await SewingLineDeliverySchema.findAll({
-      where: {
-        [query.field]: query.id
-      }
-    })
-
-    // Tìm các bản ghi cần thêm mới
-    const recordsToAdd = newRecords.filter(
-      (newRecord) => !existingRecords.some((existingRecord) => existingRecord.sewingLineID === newRecord.sewingLineID)
-    )
-    // Tìm các bản ghi cần cập nhật
-    const recordsToUpdate = newRecords.filter((newRecord) =>
-      existingRecords.some((existingRecord) => existingRecord.sewingLineID === newRecord.sewingLineID)
-    )
-    // Tìm các bản ghi cần xoá
-    const recordsToDelete = existingRecords.filter(
-      (existingRecord) =>
-        !newRecords.some((updatedRecord) => updatedRecord.sewingLineID === existingRecord.sewingLineID)
-    )
-
-    // Thêm mới các bảng ghi mới
-    if (recordsToAdd.length > 0) {
-      await SewingLineDeliverySchema.bulkCreate(
-        recordsToAdd.map((item) => {
-          return { ...item, status: 'active' } as SewingLineDelivery
-        })
-      )
-    }
-
-    // Cập nhật các bảng ghi
-    if (recordsToUpdate.length > 0) {
-      for (const record of recordsToUpdate) {
-        const recordFound = await SewingLineDeliverySchema.findOne({
-          where: { sewingLineID: record.sewingLineID, productID: record.productID }
-        })
-        if (recordFound) {
-          await recordFound.update(record, { where: { productID: record.productID } })
+    const updatedItems = await Promise.all(
+      itemsUpdate.map(async (item) => {
+        const user = await SewingLineDeliverySchema.findByPk(item.id)
+        if (!user) {
+          throw new Error(`Item with id ${item.id} not found`)
         }
-      }
-    }
-
-    // if (recordsToUpdate.length > 0) {
-    //   await Promise.all(
-    //     recordsToUpdate.map((record) => {
-    //       return SewingLineDeliverySchema.update(record, {
-    //         where: { sewingLineID: record.sewingLineID },
-    //         transaction: t
-    //       })
-    //     })
-    //   )
-    // }
-
-    // Xoá các bản ghi không còn trong danh sách
-    // if (recordsToDelete.length > 0 && (recordsToAdd.length <= 0 || recordsToUpdate.length <= 0)) {
-    //   await SewingLineDeliverySchema.destroy({
-    //     where: {
-    //       sewingLineID: recordsToDelete.map((record) => record.sewingLineID)
-    //     }
-    //   })
-    // }
-
-    if (recordsToDelete.length > 0) {
-      for (const record of recordsToDelete) {
-        const recordFound = await SewingLineDeliverySchema.findOne({
-          where: { sewingLineID: record.sewingLineID, productID: record.productID }
-        })
-        if (recordFound) {
-          await recordFound.destroy()
-        }
-      }
-    }
-
-    // Trả về danh sách cập nhật sau xử lý
-    const updatedList = [
-      ...existingRecords.filter((record) => recordsToDelete.includes(record), ...recordsToAdd, ...recordsToUpdate)
-    ]
-    return updatedList
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw `${error.message}`
-  }
-}
-
-// Update by productID
-export const updateItemByPk = async (
-  id: number,
-  recordToUpdate: SewingLineDelivery
-): Promise<SewingLineDelivery | undefined> => {
-  try {
-    const affectedRows = await SewingLineDeliverySchema.update(
-      {
-        ...recordToUpdate
-      },
-      {
-        where: {
-          id: id
-        }
-      }
+        await user.update(item)
+        return user
+      })
     )
-    return affectedRows[0] > 0 ? recordToUpdate : undefined
+    return updatedItems
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw `${error.message}`
+    throw `Error updating multiple item: ${error.message}`
   }
 }
 
-export const updateItemBySewingLineID = async (
-  sewingLineID: number,
-  recordToUpdate: SewingLineDelivery
-): Promise<SewingLineDelivery | undefined> => {
+// Delete
+export const deleteItemByPk = async (id: number) => {
   try {
-    const affectedRows = await SewingLineDeliverySchema.update(
-      {
-        ...recordToUpdate
-      },
-      {
-        where: {
-          sewingLineID: sewingLineID
-        }
-      }
-    )
-    return affectedRows[0] > 0 ? recordToUpdate : undefined
+    const itemFound = await SewingLineDeliverySchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.destroy()
+    return { message: 'Deleted successfully' }
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw `${error.message}`
-  }
-}
-
-export const updateItemByProductID = async (
-  productID: number,
-  recordToUpdate: SewingLineDelivery
-): Promise<SewingLineDelivery | undefined> => {
-  try {
-    const affectedRows = await SewingLineDeliverySchema.update(
-      {
-        ...recordToUpdate
-      },
-      {
-        where: {
-          productID: productID
-        }
-      }
-    )
-    return affectedRows[0] > 0 ? recordToUpdate : undefined
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw `${error.message}`
-  }
-}
-
-// Delete importedID
-export const deleteItemByPk = async (id: number): Promise<number> => {
-  try {
-    const affectedRows = await SewingLineDeliverySchema.destroy({ where: { id: id } })
-    return affectedRows
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-export const deleteItemBySewingLineID = async (sewingLineID: number): Promise<number> => {
-  try {
-    const affectedRows = await SewingLineDeliverySchema.destroy({ where: { sewingLineID: sewingLineID } })
-    return affectedRows
-  } catch (error: any) {
-    logging.error(NAMESPACE, `Error deleteItemBySewingLineID :: ${error}`)
-    throw `deleteItemBySewingLineID :: ${error}`
-  }
-}
-
-export const deleteItemByProductID = async (productID: number): Promise<number> => {
-  try {
-    const affectedRows = await SewingLineDeliverySchema.destroy({ where: { productID: productID } })
-    return affectedRows
-  } catch (error: any) {
-    logging.error(NAMESPACE, `Error deleteItemByProductID :: ${error}`)
-    throw `deleteItemByProductID :: ${error}`
+    throw new Error(`Error deleting item: ${error.message}`)
   }
 }

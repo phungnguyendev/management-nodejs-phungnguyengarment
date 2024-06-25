@@ -9,8 +9,8 @@ const { INTEGER, STRING, DATE, FLOAT } = DataType
 
 export type Product = {
   id?: number
-  productCode?: string
-  quantityPO?: number
+  productCode?: string | null
+  quantityPO?: number | null
   status?: ItemStatusType
   dateInputNPL?: Date
   dateOutputFCR?: Date

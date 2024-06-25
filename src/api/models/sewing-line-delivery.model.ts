@@ -9,9 +9,9 @@ export type SewingLineDelivery = {
   id?: number
   sewingLineID?: number
   productID?: number
-  quantityOriginal?: number
-  quantitySewed?: number
-  expiredDate?: string
+  quantityOriginal?: number | null
+  quantitySewed?: number | null
+  expiredDate?: string | null
   status?: ItemStatusType
 }
 

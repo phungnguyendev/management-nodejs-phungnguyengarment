@@ -5,7 +5,7 @@ const { INTEGER, STRING } = DataType
 
 export type Print = {
   id?: number
-  name?: string
+  name?: string | null
   status?: ItemStatusType
 }
 

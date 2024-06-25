@@ -7,9 +7,9 @@ export interface StepRound {
 
 export interface ProductResponse {
   productID?: number
-  productCode?: string
-  quantityPO?: number
-  dateOutputFCR?: string
+  productCode?: string | null
+  quantityPO?: number | null
+  dateOutputFCR?: string | null
   stepRounds: StepRound[]
-  orderNumber?: number
+  orderNumber?: number | null
 }

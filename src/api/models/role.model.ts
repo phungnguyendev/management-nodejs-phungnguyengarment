@@ -5,10 +5,10 @@ const { INTEGER, BOOLEAN, STRING } = DataType
 
 export interface Role {
   id?: number
-  role?: string // product_manager
-  isAdmin?: boolean // product_manager
-  shortName?: string // Product manager
-  desc?: string // Quản lý sản phẩm
+  role?: string | null // product_manager
+  isAdmin?: boolean | null // product_manager
+  shortName?: string | null // Product manager
+  desc?: string | null // Quản lý sản phẩm
   status?: ItemStatusType
 }
 

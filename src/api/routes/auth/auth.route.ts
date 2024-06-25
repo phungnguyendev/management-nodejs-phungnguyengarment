@@ -1,49 +1,43 @@
 import { Router } from 'express'
-import { check } from 'express-validator'
-import { validationRules } from '~/api/middleware/request-validator'
-import { validators } from '~/api/utils/constant'
-import AuthController from '~/controllers/auth/auth.controller'
+import validationRules from '~/api/middleware/request-validator'
+import * as controller from '~/controllers/auth/auth.controller'
 
-class AuthRoute {
-  router = Router()
-  controller = new AuthController()
+const router = Router()
 
-  constructor() {
-    this.initialize()
-  }
+router.post(
+  '/login',
+  validationRules([
+    { field: 'email', type: 'email', location: 'body' },
+    { field: 'password', type: 'string', location: 'body' }
+  ]),
+  controller.login
+)
 
-  private initialize() {
-    // Login chanel
-    this.router.post(
-      '/login',
-      check('username')
-        .exists()
-        .withMessage(validators.username_IS_EMPTY)
-        .isString()
-        .withMessage(validators.username_IS_IN_WRONG_FORMAT),
-      check('password')
-        .exists()
-        .withMessage(validators.PASSWORD_IS_EMPTY)
-        .isLength({ min: 8 })
-        .withMessage(validators.PASSWORD_LENGTH_MUST_BE_MORE_THAN_8),
-      this.controller.login
-    )
+router.get(
+  '/user-info',
+  validationRules([{ field: 'authorization', type: 'string', location: 'headers' }]),
+  controller.getUserInfoFromAccessToken
+)
 
-    this.router.post(
-      '/send-email/:email',
-      validationRules([{ field: 'email', fieldType: 'string', location: 'params' }]),
-      this.controller.sendEmailOTPCode
-    )
+router.post(
+  '/verify-email/:email',
+  validationRules([{ field: 'email', type: 'string', location: 'params' }]),
+  controller.verifyEmailAndSendOTP
+)
 
-    this.router.post(
-      '/verify-otp/:email',
-      validationRules([
-        { field: 'email', fieldType: 'string', location: 'params' },
-        { field: 'otp', fieldType: 'string', location: 'body' }
-      ]),
-      this.controller.verifyOTP
-    )
-  }
-}
+router.post(
+  '/verify-otp/:email',
+  validationRules([
+    { field: 'email', type: 'string', location: 'params' },
+    { field: 'otp', type: 'string', location: 'body' }
+  ]),
+  controller.verifyOTPCode
+)
 
-export default new AuthRoute().router
+router.post(
+  '/logout',
+  validationRules([{ field: 'refreshToken', type: 'string', location: 'body' }]),
+  controller.logout
+)
+
+export default router

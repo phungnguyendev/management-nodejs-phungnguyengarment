@@ -3,15 +3,15 @@ import { NextFunction, Request, Response } from 'express'
 import methods, { Method, MethodType } from './methods'
 
 export interface ResponseStory {
-  success?: boolean
-  message?: string
-  detailError?: string
+  success?: boolean | null
+  message?: string | null
+  detailError?: string | null
   data?: any
   meta?: any
-  length?: number
-  page?: number
-  pageSize?: number
-  total?: number
+  length?: number | null
+  page?: number | null
+  pageSize?: number | null
+  total?: number | null
 }
 
 type ResponseFunction = {

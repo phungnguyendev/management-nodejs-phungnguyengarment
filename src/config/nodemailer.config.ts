@@ -4,22 +4,27 @@ import Mail from 'nodemailer/lib/mailer'
 import { User } from '~/api/models/user.model'
 import appConfig from './app.config'
 
+const name = appConfig.company_name
+const address = appConfig.admin.mail
+const appPassword = appConfig.admin.app_password
+
 export const transporter = nodemailer.createTransport({
   service: 'gmail',
   // host: 'smtp.gmail.com',
   // port: 465,
   // secure: true,
   auth: {
-    user: appConfig.nodemailer.admin_user, // Sender email address
-    pass: appConfig.nodemailer.admin_password // App password from gmail account
+    // type: 'oauth2',
+    user: address, // Sender email address
+    pass: appPassword // App password from gmail account
   }
 })
 
 export const mailOptionVerifyOTPCode = (sendToEmails: string[] | string, otpCode: string): Mail.Options => {
   return {
     from: {
-      name: appConfig.company_name,
-      address: appConfig.nodemailer.admin_user
+      name: name,
+      address: address
     },
     to: sendToEmails,
     subject: 'OTP for Authentication',
@@ -34,12 +39,15 @@ export const mailOptionVerifyOTPCode = (sendToEmails: string[] | string, otpCode
         <div style="background-color: #f4f4f4; padding: 20px;">
             <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); padding: 20px;">
                 <h2 style="text-align: center; color: #007bff;">OTP Verification</h2>
-                <p>Dear user,</p>
-                <p>Your OTP (One-Time Password) for verification is: <h3><strong>${otpCode}</strong></h3></p>
+                <p>Dear ${sendToEmails},</p>
+                <p>Your OTP (One-Time Password) for verification is: <h2><strong>${otpCode}</strong></h2></p>
                 <p>Please use this OTP to verify your email address.</p>
                 <p>If you didn't request this, you can safely ignore this email.</p>
-                <p>Thank you,</p>
-                <p>Phung Nguyen Garment</p>
+                <p>Thank you!</p>
+                <div class="footer">
+                <p>Best regards,</p>
+                <p>Phung Nguyen Dev Team</p>
+            </div>
             </div>
         </div>
     </body>
@@ -51,8 +59,8 @@ export const mailOptionVerifyOTPCode = (sendToEmails: string[] | string, otpCode
 export const mailOptionToSendUserInfo = (sendToEmails: string[] | string, userInfo: User): Mail.Options => {
   return {
     from: {
-      name: appConfig.company_name,
-      address: appConfig.nodemailer.admin_user
+      name: name,
+      address: address
     },
     to: sendToEmails,
     subject: 'User Information',
@@ -112,7 +120,7 @@ export const mailOptionToSendUserInfo = (sendToEmails: string[] | string, userIn
             <p>Thank you!</p>
             <div class="footer">
                 <p>Best regards,</p>
-                <p>Phung Nguyen Garment Team</p>
+                <p>Phung Nguyen Dev Team</p>
             </div>
         </div>
     </body>

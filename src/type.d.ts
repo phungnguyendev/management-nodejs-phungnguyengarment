@@ -1,4 +1,4 @@
-export type ItemStatusType = 'draft' | 'active' | 'closed' | 'archived' | 'deleted' | 'un_active'
+export type ItemStatusType = 'active' | 'deleted' | 'pending'
 
 export type NoteItemStatusType = 'lake' | 'enough' | 'arrived' | 'not_arrived'
 

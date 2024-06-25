@@ -1,144 +1,77 @@
+import { getItemsQuery } from '~/helpers/query'
 import SampleSewingSchema, { SampleSewing } from '~/models/sample-sewing.model'
-import { ItemStatusType, RequestBodyType } from '~/type'
-import logging from '~/utils/logging'
-import { dynamicQuery } from '../helpers/query'
-import ProductSchema from '../models/product.model'
+import { RequestBodyType } from '~/type'
 
 const NAMESPACE = 'services/sample-sewing'
 
-export const createNewItem = async (item: SampleSewing): Promise<SampleSewingSchema> => {
+export const createNewItem = async (item: SampleSewing) => {
   try {
-    return await SampleSewingSchema.create({ ...item })
+    const newItem = await SampleSewingSchema.create(item)
+    return newItem
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error creating item: ${error.message}`)
   }
 }
 
 // Get by id
-export const getItemByPk = async (id: number): Promise<SampleSewingSchema | null> => {
+export const getItemByPk = async (id: number) => {
   try {
-    const item = await SampleSewingSchema.findByPk(id, { include: [{ model: ProductSchema, as: 'product' }] })
-    return item
+    const itemFound = await SampleSewingSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    return itemFound
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-export const getItemBy = async (data: SampleSewing): Promise<SampleSewingSchema | null> => {
-  try {
-    const item = await SampleSewingSchema.findOne({
-      where: { ...data },
-      include: [{ model: ProductSchema, as: 'product' }]
-    })
-    return item
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error getting item: ${error.message}`)
   }
 }
 
 // Get all
-export const getItems = async (body: RequestBodyType): Promise<{ count: number; rows: SampleSewingSchema[] }> => {
+export const getItems = async (body: RequestBodyType) => {
   try {
-    const items = await SampleSewingSchema.findAndCountAll({
-      offset: (Number(body.paginator.page) - 1) * Number(body.paginator.pageSize),
-      limit: body.paginator.pageSize === -1 ? undefined : body.paginator.pageSize,
-      order: [[body.sorting.column, body.sorting.direction]],
-      where: dynamicQuery<SampleSewing>(body),
-      include: [{ model: ProductSchema, as: 'product' }]
-    })
+    const items = await SampleSewingSchema.findAndCountAll(getItemsQuery(body))
     return items
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw `Error getting list: ${error.message}`
   }
 }
 
-export const getItemsWithStatus = async (status: ItemStatusType): Promise<SampleSewingSchema[]> => {
+// Update
+export const updateItemByPk = async (id: number, itemToUpdate: SampleSewing) => {
   try {
-    const items = await SampleSewingSchema.findAll({
-      where: {
-        status: status
-      },
-      include: [{ model: ProductSchema, as: 'product' }]
-    })
-    return items
+    const itemFound = await SampleSewingSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.update(itemToUpdate)
+    return itemToUpdate
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error updating item: ${error.message}`)
   }
 }
 
-export const getItemsCount = async (): Promise<number> => {
+export const updateItems = async (itemsUpdate: SampleSewing[]) => {
   try {
-    return await SampleSewingSchema.count()
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-// Update by productID
-export const updateItemByPk = async (id: number, itemToUpdate: SampleSewing): Promise<SampleSewing | undefined> => {
-  try {
-    const affectedRows = await SampleSewingSchema.update(
-      {
-        ...itemToUpdate
-      },
-      {
-        where: {
-          id: id
+    const updatedItems = await Promise.all(
+      itemsUpdate.map(async (item) => {
+        const user = await SampleSewingSchema.findByPk(item.id)
+        if (!user) {
+          throw new Error(`Item with id ${item.id} not found`)
         }
-      }
+        await user.update(item)
+        return user
+      })
     )
-    return affectedRows[0] > 0 ? itemToUpdate : undefined
+    return updatedItems
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw `Error updating multiple item: ${error.message}`
   }
 }
 
-export const updateItemByProductID = async (
-  productID: number,
-  itemToUpdate: SampleSewing
-): Promise<SampleSewing | undefined> => {
+// Delete
+export const deleteItemByPk = async (id: number) => {
   try {
-    const affectedRows = await SampleSewingSchema.update(
-      {
-        ...itemToUpdate
-      },
-      {
-        where: {
-          productID: productID
-        }
-      }
-    )
-    return affectedRows[0] > 0 ? itemToUpdate : undefined
+    const itemFound = await SampleSewingSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.destroy()
+    return { message: 'Deleted successfully' }
   } catch (error: any) {
-    logging.error(NAMESPACE, `Error updateItemByProductID :: ${error}`)
-    throw new Error(`updateItemByProductID :: ${error}`)
-  }
-}
-
-// Delete importedID
-export const deleteItemByPk = async (id: number): Promise<number> => {
-  try {
-    const affectedRows = await SampleSewingSchema.destroy({ where: { id: id } })
-    return affectedRows
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-export const deleteItemByProductID = async (productID: number): Promise<number> => {
-  try {
-    const affectedRows = await SampleSewingSchema.destroy({ where: { productID: productID } })
-    return affectedRows
-  } catch (error: any) {
-    logging.error(NAMESPACE, `Error deleteItemByProductID :: ${error}`)
-    throw new Error(`deleteItemByProductID :: ${error}`)
+    throw new Error(`Error deleting item: ${error.message}`)
   }
 }

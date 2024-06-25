@@ -1,109 +1,42 @@
 import { Router } from 'express'
-import SewingLineDeliveryController from '../controllers/sewing-line-delivery.controller'
-import { validationRules } from '../middleware/request-validator'
+import * as controller from '~/controllers/sewing-line-delivery.controller'
+import validationRules from '~/middleware/request-validator'
 
-class SewingLineDeliveryRoute {
-  router = Router()
-  controller = new SewingLineDeliveryController()
+const router = Router()
 
-  constructor() {
-    this.initialize()
-  }
+router.post(
+  '/',
+  validationRules([
+    { field: 'sewingLineID', type: 'int', location: 'body' },
+    { field: 'productID', type: 'int', location: 'body' },
+    { field: 'quantityOriginal', type: 'int', location: 'body' },
+    { field: 'quantitySewed', type: 'int', location: 'body' },
+    { field: 'expiredDate', type: 'date', location: 'body' }
+  ]),
+  controller.createNewItem
+)
 
-  private initialize() {
-    // Create new item
-    this.router.post(
-      '/',
-      validationRules([
-        { field: 'sewingLineID', fieldType: 'int', location: 'body' },
-        { field: 'productID', fieldType: 'int', location: 'body' },
-        { field: 'quantityOriginal', fieldType: 'float', location: 'body' },
-        { field: 'expiredDate', fieldType: 'date', location: 'body' }
-      ]),
-      this.controller.createNewItem
-    )
+// Get item by productID and importedID
+router.get('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.getItemByPk)
 
-    this.router.post('/items', this.controller.createNewItems)
+// Get all items
+router.post(
+  '/find',
+  validationRules([
+    { field: 'filter', type: 'object', location: 'body' },
+    { field: 'paginator', type: 'object', location: 'body' },
+    { field: 'search', type: 'object', location: 'body' },
+    { field: 'sorting', type: 'object', location: 'body' }
+  ]),
+  controller.getItems
+)
 
-    // Get item
-    this.router.get(
-      '/id',
-      validationRules([{ field: 'id', fieldType: 'int', location: 'params' }]),
-      this.controller.getItemByPk
-    )
+router.put('/', controller.updateItems)
 
-    // Get item
-    this.router.get(
-      '/sewingLineID/:sewingLineID',
-      validationRules([{ field: 'sewingLineID', fieldType: 'int', location: 'params' }]),
-      this.controller.getItemBySewingLineID
-    )
+// Update item by productID and importedID
+router.patch('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.updateItemByPk)
 
-    // Get item
-    this.router.get(
-      '/productID/:productID',
-      validationRules([{ field: 'productID', fieldType: 'int', location: 'params' }]),
-      this.controller.getItemByProductID
-    )
+// Delete item by productID
+router.delete('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.deleteItemByPk)
 
-    // Get all items
-    this.router.post(
-      '/find',
-      validationRules([
-        { field: 'filter', fieldType: 'object', location: 'body' },
-        { field: 'paginator', fieldType: 'object', location: 'body' },
-        { field: 'search', fieldType: 'object', location: 'body' },
-        { field: 'sorting', fieldType: 'object', location: 'body' }
-      ]),
-      this.controller.getItems
-    )
-
-    this.router.post(
-      '/updateItems/productID/:productID',
-      validationRules([{ field: 'productID', fieldType: 'int', location: 'params' }]),
-      this.controller.updateItemsByProductID
-    )
-
-    // Update item by productID and importedID
-    this.router.put(
-      '/:id',
-      validationRules([{ field: 'id', fieldType: 'int', location: 'params' }]),
-      this.controller.updateItemByPk
-    )
-
-    // Update item by productID and importedID
-    this.router.post(
-      '/sewingLineID/:sewingLineID',
-      validationRules([{ field: 'sewingLineID', fieldType: 'int', location: 'params' }]),
-      this.controller.updateItemBySewingLineID
-    )
-
-    // Update item by productID and importedID
-    this.router.put(
-      '/productID/:productID',
-      validationRules([{ field: 'productID', fieldType: 'int', location: 'params' }]),
-      this.controller.updateItemByProductID
-    )
-
-    // Delete item by productID
-    this.router.delete(
-      '/:id',
-      validationRules([{ field: 'id', fieldType: 'int', location: 'params' }]),
-      this.controller.deleteItemByPk
-    )
-
-    this.router.delete(
-      '/sewingLineID/:sewingLineID',
-      validationRules([{ field: 'sewingLineID', fieldType: 'int', location: 'params' }]),
-      this.controller.deleteItemBySewingLineID
-    )
-
-    this.router.delete(
-      '/productID/:productID',
-      validationRules([{ field: 'productID', fieldType: 'int', location: 'params' }]),
-      this.controller.deleteItemByProductID
-    )
-  }
-}
-
-export default new SewingLineDeliveryRoute().router
+export default router

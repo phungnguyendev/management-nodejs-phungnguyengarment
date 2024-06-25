@@ -7,32 +7,32 @@ const { INTEGER, STRING, DATE, FLOAT, BOOLEAN } = DataType
 export type CuttingGroup = {
   id?: number
   productID?: number
-  quantityRealCut?: number
-  timeCut?: string
-  dateSendEmbroidered?: string
-  quantityDeliveredBTP?: string
+  quantityRealCut?: number | null
+  dateTimeCut?: string | null
+  dateSendEmbroidered?: string | null
+  quantityDeliveredBTP?: string | null
   status?: ItemStatusType
-  syncStatus?: boolean
-  dateArrived1Th?: string
-  quantityArrived1Th?: string
-  dateArrived2Th?: string
-  quantityArrived2Th?: string
-  dateArrived3Th?: string
-  quantityArrived3Th?: string
-  dateArrived4Th?: string
-  quantityArrived4Th?: string
-  dateArrived5Th?: string
-  quantityArrived5Th?: string
-  dateArrived6Th?: string
-  quantityArrived6Th?: string
-  dateArrived7Th?: string
-  quantityArrived7Th?: string
-  dateArrived8Th?: string
-  quantityArrived8Th?: string
-  dateArrived9Th?: string
-  quantityArrived9Th?: string
-  dateArrived10Th?: string
-  quantityArrived10Th?: string
+  syncStatus?: boolean | null
+  dateArrived1Th?: string | null
+  quantityArrived1Th?: string | null
+  dateArrived2Th?: string | null
+  quantityArrived2Th?: string | null
+  dateArrived3Th?: string | null
+  quantityArrived3Th?: string | null
+  dateArrived4Th?: string | null
+  quantityArrived4Th?: string | null
+  dateArrived5Th?: string | null
+  quantityArrived5Th?: string | null
+  dateArrived6Th?: string | null
+  quantityArrived6Th?: string | null
+  dateArrived7Th?: string | null
+  quantityArrived7Th?: string | null
+  dateArrived8Th?: string | null
+  quantityArrived8Th?: string | null
+  dateArrived9Th?: string | null
+  quantityArrived9Th?: string | null
+  dateArrived10Th?: string | null
+  quantityArrived10Th?: string | null
 }
 
 @Table({
@@ -51,8 +51,8 @@ export default class CuttingGroupSchema extends Model<CuttingGroup> {
   @Column({ type: FLOAT, field: 'quantity_real_cut' })
   declare quantityRealCut: string
 
-  @Column({ type: DATE, field: 'time_cut' })
-  declare timeCut: string
+  @Column({ type: DATE, field: 'date_time_cut' })
+  declare dateTimeCut: string
 
   @Column({ type: DATE, field: 'date_send_embroidered' })
   declare dateSendEmbroidered: string

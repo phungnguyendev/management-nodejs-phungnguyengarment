@@ -1,121 +1,95 @@
+import appConfig from '~/config/app.config'
+import { mailOptionVerifyOTPCode, transporter } from '~/config/nodemailer.config'
+import { getItemsQuery } from '~/helpers/query'
 import UserSchema, { User } from '~/models/user.model'
-import { ItemStatusType, RequestBodyType } from '~/type'
-import logging from '~/utils/logging'
-import { dynamicQuery } from '../helpers/query'
+import { RequestBodyType } from '~/type'
+import TokenSchema from '../models/token.model'
+import { otpGenerator } from '../utils'
 
 const NAMESPACE = 'services/user'
 
-export const createNewItem = async (item: User): Promise<UserSchema | null> => {
+export const createNewItem = async (item: User) => {
   try {
-    const userCreated = await UserSchema.create({ ...item })
-    return userCreated
+    const userFound = await UserSchema.findOne({ where: { email: item.email } })
+    if (userFound) throw new Error(`User already exists!`)
+    const newUser = await UserSchema.create(item)
+    const otp = otpGenerator()
+    await transporter.sendMail(mailOptionVerifyOTPCode(newUser.email, otp)).then(() => {
+      newUser.update({ otp: otp })
+    })
+    return newUser
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error creating item: ${error.message}`)
   }
 }
 
 // Get by id
-export const getItemByPk = async (id: number): Promise<UserSchema | null> => {
+export const getItemByPk = async (id: number) => {
   try {
-    return await UserSchema.findByPk(id)
+    const itemFound = await UserSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    delete itemFound.dataValues.password
+    return itemFound.dataValues
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-export const getItemBy = async (item: User): Promise<UserSchema | null> => {
-  try {
-    return await UserSchema.findOne({ where: { ...item } })
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error getting item: ${error.message}`)
   }
 }
 
 // Get all
-export const getItems = async (body: RequestBodyType): Promise<{ count: number; rows: UserSchema[] }> => {
+export const getItems = async (body: RequestBodyType) => {
   try {
-    const items = await UserSchema.findAndCountAll({
-      offset: (Number(body.paginator.page) - 1) * Number(body.paginator.pageSize),
-      limit: body.paginator.pageSize === -1 ? undefined : body.paginator.pageSize,
-      order: [[body.sorting.column, body.sorting.direction]],
-      where: dynamicQuery<User>(body)
-    })
+    const items = await UserSchema.findAndCountAll(getItemsQuery(body))
     return items
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw `Error getting list: ${error.message}`
   }
 }
 
-export const getItemsWithStatus = async (status: ItemStatusType): Promise<UserSchema[]> => {
+// Update
+export const updateItemByPk = async (id: number, itemToUpdate: User) => {
   try {
-    return await UserSchema.findAll({
+    const itemFound = await UserSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.update(itemToUpdate)
+    return itemToUpdate
+  } catch (error: any) {
+    throw new Error(`Error updating item: ${error.message}`)
+  }
+}
+
+export const updateItems = async (itemsUpdate: User[]) => {
+  try {
+    const updatedItems = await Promise.all(
+      itemsUpdate.map(async (item) => {
+        const user = await UserSchema.findByPk(item.id)
+        if (!user) {
+          throw new Error(`Item with id ${item.id} not found`)
+        }
+        await user.update(item)
+        return user
+      })
+    )
+    return updatedItems
+  } catch (error: any) {
+    throw `Error updating multiple item: ${error.message}`
+  }
+}
+
+// Delete
+export const deleteItemByPk = async (id: number) => {
+  try {
+    const itemFound = await UserSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    if (itemFound.email === appConfig.admin.mail.trim()) throw new Error(`The user is an admin, cannot be deleted!`)
+    await TokenSchema.destroy({
       where: {
-        status: status
+        userID: itemFound.id
       }
+    }).then(async () => {
+      await itemFound.destroy()
     })
+    return { message: 'Deleted successfully' }
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-export const getItemsCount = async (): Promise<number> => {
-  try {
-    return await UserSchema.count()
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-// Update by productID
-export const updateItemByPk = async (id: number, item: User): Promise<User | undefined> => {
-  try {
-    const affectedRows = await UserSchema.update(
-      {
-        ...item
-      },
-      {
-        where: {
-          id: id
-        }
-      }
-    )
-    return affectedRows[0] > 0 ? item : undefined
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-// Update by productID
-export const updateItemByEmail = async (email: string, itemToUpdate: User): Promise<User | undefined> => {
-  try {
-    const affectedRows = await UserSchema.update(
-      { ...itemToUpdate },
-      {
-        where: {
-          email: email
-        }
-      }
-    )
-    return affectedRows[0] > 0 ? itemToUpdate : undefined
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-// Delete importedID
-export const deleteItemByPk = async (id: number): Promise<number> => {
-  try {
-    return await UserSchema.destroy({ where: { id: id } })
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error deleting item: ${error.message}`)
   }
 }

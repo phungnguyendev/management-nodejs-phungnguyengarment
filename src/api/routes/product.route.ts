@@ -1,25 +1,25 @@
 import { Router } from 'express'
 import * as controller from '~/controllers/product.controller'
-import { validationRules } from '../middleware/request-validator'
+import validationRules from '~/middleware/request-validator'
 
 const router = Router()
 
 router.post(
   '/',
   validationRules([
-    { field: 'productCode', fieldType: 'string', location: 'body' },
-    { field: 'quantityPO', fieldType: 'int', location: 'body' },
-    { field: 'dateInputNPL', fieldType: 'date', location: 'body' },
-    { field: 'dateOutputFCR', fieldType: 'date', location: 'body' }
+    { field: 'productCode', type: 'string', location: 'body' },
+    { field: 'quantityPO', type: 'int', location: 'body' },
+    { field: 'dateInputNPL', type: 'date', location: 'body' },
+    { field: 'dateOutputFCR', type: 'date', location: 'body' }
   ]),
   controller.createNewItem
 )
 
 // Get item by productID and importedID
-router.get('/:id', validationRules([{ field: 'id', fieldType: 'int', location: 'params' }]), controller.getItemByPk)
+router.get('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.getItemByPk)
 router.get(
   '/productCode/:productCode',
-  validationRules([{ field: 'productCode', fieldType: 'string', location: 'params' }]),
+  validationRules([{ field: 'productCode', type: 'string', location: 'params' }]),
   controller.getItemByProductCode
 )
 
@@ -27,10 +27,10 @@ router.get(
 router.post(
   '/find',
   validationRules([
-    { field: 'filter', fieldType: 'object', location: 'body' },
-    { field: 'paginator', fieldType: 'object', location: 'body' },
-    { field: 'search', fieldType: 'object', location: 'body' },
-    { field: 'sorting', fieldType: 'object', location: 'body' }
+    { field: 'filter', type: 'object', location: 'body' },
+    { field: 'paginator', type: 'object', location: 'body' },
+    { field: 'search', type: 'object', location: 'body' },
+    { field: 'sorting', type: 'object', location: 'body' }
   ]),
   controller.getItems
 )
@@ -38,17 +38,9 @@ router.post(
 router.put('/', controller.updateItems)
 
 // Update item by productID and importedID
-router.patch(
-  '/:id',
-  validationRules([{ field: 'id', fieldType: 'int', location: 'params' }]),
-  controller.updateItemByPk
-)
+router.patch('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.updateItemByPk)
 
 // Delete item by productID
-router.delete(
-  '/:id',
-  validationRules([{ field: 'id', fieldType: 'int', location: 'params' }]),
-  controller.deleteItemByPk
-)
+router.delete('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.deleteItemByPk)
 
 export default router

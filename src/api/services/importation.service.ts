@@ -1,124 +1,77 @@
+import { getItemsQuery } from '~/helpers/query'
 import ImportationSchema, { Importation } from '~/models/importation.model'
-import { ItemStatusType, RequestBodyType } from '~/type'
-import logging from '~/utils/logging'
-import { dynamicQuery } from '../helpers/query'
-import ProductSchema from '../models/product.model'
+import { RequestBodyType } from '~/type'
 
 const NAMESPACE = 'services/importation'
 
-export const createNewItem = async (item: Importation): Promise<ImportationSchema> => {
+export const createNewItem = async (item: Importation) => {
   try {
-    return await ImportationSchema.create({ ...item })
+    const newItem = await ImportationSchema.create(item)
+    return newItem
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-export const getItemByPk = async (id: number): Promise<ImportationSchema | null> => {
-  try {
-    const item = await ImportationSchema.findByPk(id, {
-      include: [{ model: ProductSchema, as: 'product' }]
-    })
-    return item
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error creating item: ${error.message}`)
   }
 }
 
 // Get by id
-export const getItemByProductID = async (productID: number): Promise<ImportationSchema | null> => {
+export const getItemByPk = async (id: number) => {
   try {
-    const item = await ImportationSchema.findOne({
-      where: { productID: productID },
-      include: [{ model: ProductSchema, as: 'product' }]
-    })
-    return item
+    const itemFound = await ImportationSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    return itemFound
   } catch (error: any) {
-    logging.error(NAMESPACE, `Error getItemByProductID :: ${error}`)
-    throw new Error(`getItemByProductID :: ${error}`)
+    throw new Error(`Error getting item: ${error.message}`)
   }
 }
 
 // Get all
-export const getItems = async (body: RequestBodyType): Promise<{ count: number; rows: ImportationSchema[] }> => {
+export const getItems = async (body: RequestBodyType) => {
   try {
-    const items = await ImportationSchema.findAndCountAll({
-      offset: (Number(body.paginator.page) - 1) * Number(body.paginator.pageSize),
-      limit: body.paginator.pageSize === -1 ? undefined : body.paginator.pageSize,
-      order: [[body.sorting.column, body.sorting.direction]],
-      where: dynamicQuery<Importation>(body),
-      include: [{ model: ProductSchema, as: 'product' }]
-    })
+    const items = await ImportationSchema.findAndCountAll(getItemsQuery(body))
     return items
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw `Error getting list: ${error.message}`
   }
 }
 
-export const getItemsWithStatus = async (status: ItemStatusType): Promise<ImportationSchema[]> => {
+// Update
+export const updateItemByPk = async (id: number, itemToUpdate: Importation) => {
   try {
-    const items = await ImportationSchema.findAll({
-      where: {
-        status: status
-      },
-      include: [{ model: ProductSchema, as: 'product' }]
-    })
-    return items
+    const itemFound = await ImportationSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.update(itemToUpdate)
+    return itemToUpdate
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error updating item: ${error.message}`)
   }
 }
 
-export const getItemsCount = async (): Promise<number> => {
+export const updateItems = async (itemsUpdate: Importation[]) => {
   try {
-    return await ImportationSchema.count()
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-// Update by productID
-export const updateItemByPk = async (id: number, item: Importation): Promise<Importation | undefined> => {
-  try {
-    const affectedRows = await ImportationSchema.update(
-      {
-        ...item
-      },
-      {
-        where: {
-          id: id
+    const updatedItems = await Promise.all(
+      itemsUpdate.map(async (item) => {
+        const user = await ImportationSchema.findByPk(item.id)
+        if (!user) {
+          throw new Error(`Item with id ${item.id} not found`)
         }
-      }
+        await user.update(item)
+        return user
+      })
     )
-    return affectedRows[0] > 0 ? item : undefined
+    return updatedItems
   } catch (error: any) {
-    logging.error(NAMESPACE, `Error updateItemByPk :: ${error}`)
-    throw new Error(`updateItemByPk :: ${error}`)
+    throw `Error updating multiple item: ${error.message}`
   }
 }
 
-// Delete importedID
-export const deleteItemByPk = async (id: number): Promise<number> => {
+// Delete
+export const deleteItemByPk = async (id: number) => {
   try {
-    const affectedRows = await ImportationSchema.destroy({ where: { id: id } })
-    return affectedRows
+    const itemFound = await ImportationSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.destroy()
+    return { message: 'Deleted successfully' }
   } catch (error: any) {
-    logging.error(NAMESPACE, `Error deleteItemByPk :: ${error}`)
-    throw new Error(`deleteItemByPk :: ${error}`)
-  }
-}
-
-export const deleteItemByProductID = async (productID: number): Promise<number> => {
-  try {
-    const affectedRows = await ImportationSchema.destroy({ where: { productID: productID } })
-    return affectedRows
-  } catch (error: any) {
-    logging.error(NAMESPACE, `Error deleteItemByPk :: ${error}`)
-    throw new Error(`deleteItemByPk :: ${error}`)
+    throw new Error(`Error deleting item: ${error.message}`)
   }
 }

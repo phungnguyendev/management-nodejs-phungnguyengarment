@@ -1,161 +1,77 @@
+import { getItemsQuery } from '~/helpers/query'
 import CompletionSchema, { Completion } from '~/models/completion.model'
-import { ItemStatusType, RequestBodyType } from '~/type'
-import logging from '~/utils/logging'
-import { dynamicQuery } from '../helpers/query'
-import ProductSchema from '../models/product.model'
+import { RequestBodyType } from '~/type'
 
 const NAMESPACE = 'services/completion'
 
-export const createNewItem = async (item: Completion): Promise<CompletionSchema> => {
+export const createNewItem = async (item: Completion) => {
   try {
-    return await CompletionSchema.create({
-      ...item
-    })
+    const newItem = await CompletionSchema.create(item)
+    return newItem
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${NAMESPACE} ${error}`)
-  }
-}
-export const createOrUpdateItemByPk = async (
-  id: number,
-  item: Completion
-): Promise<Completion | CompletionSchema | undefined> => {
-  try {
-    const affectedRows = await CompletionSchema.update(
-      {
-        ...item
-      },
-      {
-        where: {
-          id: id
-        }
-      }
-    )
-    if (affectedRows[0] > 0) {
-      return item
-    } else {
-      return await CompletionSchema.create({ ...item })
-    }
-  } catch (error: any) {
-    logging.error(NAMESPACE, `Error createOrUpdateItemByPk :: ${error}`)
-    throw new Error(`createOrUpdateItemByPk :: ${error}`)
-  }
-}
-// Get by id
-export const getItemByPk = async (id: number): Promise<CompletionSchema | null> => {
-  try {
-    const item = await CompletionSchema.findByPk(id, {
-      include: [{ model: ProductSchema, as: 'product' }]
-    })
-    return item
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw new Error(`Error creating item: ${error.message}`)
   }
 }
 
 // Get by id
-export const getItemBy = async (item: Completion): Promise<CompletionSchema | null> => {
+export const getItemByPk = async (id: number) => {
   try {
-    const itemFound = await CompletionSchema.findOne({
-      where: { ...item },
-      include: [{ model: ProductSchema, as: 'product' }]
-    })
+    const itemFound = await CompletionSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${NAMESPACE} ${error}`)
+    throw new Error(`Error getting item: ${error.message}`)
   }
 }
 
 // Get all
-export const getItems = async (body: RequestBodyType): Promise<{ count: number; rows: CompletionSchema[] }> => {
+export const getItems = async (body: RequestBodyType) => {
   try {
-    const items = await CompletionSchema.findAndCountAll({
-      offset: (Number(body.paginator.page) - 1) * Number(body.paginator.pageSize),
-      limit: body.paginator.pageSize === -1 ? undefined : body.paginator.pageSize,
-      order: [[body.sorting.column, body.sorting.direction]],
-      where: dynamicQuery<Completion>(body),
-      include: [{ model: ProductSchema, as: 'product' }]
-    })
+    const items = await CompletionSchema.findAndCountAll(getItemsQuery(body))
     return items
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${NAMESPACE} ${error}`)
-  }
-}
-
-export const getItemsWithStatus = async (status: ItemStatusType): Promise<CompletionSchema[]> => {
-  try {
-    const items = await CompletionSchema.findAll({
-      where: {
-        status: status
-      },
-      include: [{ model: ProductSchema, as: 'product' }]
-    })
-    return items
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-export const getItemsCount = async (): Promise<number> => {
-  try {
-    return await ProductSchema.count()
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${NAMESPACE} ${error}`)
+    throw `Error getting list: ${error.message}`
   }
 }
 
 // Update
-export const updateItemByPk = async (id: number, itemToUpdate: Completion): Promise<Completion | undefined> => {
+export const updateItemByPk = async (id: number, itemToUpdate: Completion) => {
   try {
-    const affectedRows = await CompletionSchema.update(
-      {
-        ...itemToUpdate
-      },
-      {
-        where: {
-          id: id
-        }
-      }
-    )
-    return affectedRows[0] > 0 ? itemToUpdate : undefined
+    const itemFound = await CompletionSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.update(itemToUpdate)
+    return itemToUpdate
   } catch (error: any) {
-    logging.error(NAMESPACE, `Error updateItemByPk :: ${error}`)
-    throw new Error(`updateItemByPk :: ${error}`)
+    throw new Error(`Error updating item: ${error.message}`)
   }
 }
 
-export const updateItemByProductID = async (
-  productID: number,
-  itemToUpdate: Completion
-): Promise<Completion | undefined> => {
+export const updateItems = async (itemsUpdate: Completion[]) => {
   try {
-    const affectedRows = await CompletionSchema.update(
-      {
-        ...itemToUpdate
-      },
-      {
-        where: {
-          productID: productID
+    const updatedItems = await Promise.all(
+      itemsUpdate.map(async (item) => {
+        const user = await CompletionSchema.findByPk(item.id)
+        if (!user) {
+          throw new Error(`Item with id ${item.id} not found`)
         }
-      }
+        await user.update(item)
+        return user
+      })
     )
-    return affectedRows[0] > 0 ? itemToUpdate : undefined
+    return updatedItems
   } catch (error: any) {
-    logging.error(NAMESPACE, `Error updateItemByProductID :: ${error}`)
-    throw new Error(`updateItemByProductID :: ${error}`)
+    throw `Error updating multiple item: ${error.message}`
   }
 }
 
-export const deleteItemBy = async (query: { field: string; id: number }): Promise<number> => {
+// Delete
+export const deleteItemByPk = async (id: number) => {
   try {
-    return await CompletionSchema.destroy({ where: { [query.field]: query.id } })
+    const itemFound = await CompletionSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.destroy()
+    return { message: 'Deleted successfully' }
   } catch (error: any) {
-    logging.error(NAMESPACE, `Error deleteItemBy :: ${error}`)
-    throw new Error(`deleteItemBy :: ${error}`)
+    throw new Error(`Error deleting item: ${error.message}`)
   }
 }

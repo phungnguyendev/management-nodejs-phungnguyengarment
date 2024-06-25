@@ -1,15 +1,14 @@
 import { NextFunction, Request, Response } from 'express'
 import { Location, ValidationChain, body, cookie, header, param, query, validationResult } from 'express-validator'
-import { validators } from '../utils/constant'
 
 type RuleType = {
-  location: Location
   field: string
-  fieldType: 'string' | 'int' | 'float' | 'date' | 'boolean' | 'object' | 'array'
-  required?: boolean
+  location: Location
+  type: 'string' | 'int' | 'float' | 'date' | 'boolean' | 'object' | 'array' | 'email'
+  required?: boolean | null
 }
 
-export const validationRules = (rules: RuleType[]) => {
+const validationRules = (rules: RuleType[]) => {
   const smartRenderValidationChain = (rule: RuleType): ValidationChain => {
     switch (rule.location) {
       case 'body':
@@ -26,63 +25,73 @@ export const validationRules = (rules: RuleType[]) => {
   }
 
   const customValidators = (rule: RuleType, validationChain: ValidationChain): ValidationChain => {
-    switch (rule.fieldType) {
+    switch (rule.type) {
       case 'string':
         return validationChain
           .exists()
-          .withMessage(validators.ROLE_DOES_NOT_EXIST)
+          .withMessage('Field is not exist!')
           .notEmpty()
-          .withMessage(validators.ROLE_IS_EMPTY)
+          .withMessage('Field is not empty!')
           .isString()
-          .withMessage(validators.ROLE_MUST_BE_STRING_TYPE)
+          .withMessage('Field must be string type!')
+      case 'email':
+        return validationChain
+          .exists()
+          .withMessage('Field is not exist!')
+          .notEmpty()
+          .withMessage('Field is not empty!')
+          .isString()
+          .withMessage('Field must be string type!')
+          .isEmail()
+          .withMessage('Field is not valid email type!')
       case 'int':
         return validationChain
           .exists()
-          .withMessage(validators.ROLE_DOES_NOT_EXIST)
+          .withMessage('Field is not exist!')
           .notEmpty()
-          .withMessage(validators.ROLE_IS_EMPTY)
+          .withMessage('Field is not empty!')
           .isInt()
-          .withMessage(validators.ROLE_MUST_BE_INTEGER_TYPE)
+          .withMessage('Field must be int type!')
       case 'float':
         return validationChain
           .exists()
-          .withMessage(validators.ROLE_DOES_NOT_EXIST)
+          .withMessage('Field is not exist!')
           .notEmpty()
-          .withMessage(validators.ROLE_IS_EMPTY)
+          .withMessage('Field is not empty!')
           .isFloat()
-          .withMessage(validators.ROLE_MUST_BE_FLOAT_TYPE)
+          .withMessage('Field must be float type!')
       case 'boolean':
         return validationChain
           .exists()
-          .withMessage(validators.ROLE_DOES_NOT_EXIST)
+          .withMessage('Field is not exist!')
           .notEmpty()
-          .withMessage(validators.ROLE_IS_EMPTY)
-          .isString()
-          .withMessage(validators.ROLE_MUST_BE_STRING_TYPE)
+          .withMessage('Field is not empty!')
+          .isBoolean()
+          .withMessage('Field must be boolean type!')
       case 'date':
         return validationChain
           .exists()
-          .withMessage(validators.ROLE_DOES_NOT_EXIST)
+          .withMessage('Field is not exist!')
           .notEmpty()
-          .withMessage(validators.ROLE_IS_EMPTY)
-          .isString()
-          .withMessage(validators.ROLE_MUST_BE_DATE_TYPE)
+          .withMessage('Field is not empty!')
+          .isDate()
+          .withMessage('Field must be date type!')
       case 'array':
         return validationChain
           .exists()
-          .withMessage(validators.ROLE_DOES_NOT_EXIST)
+          .withMessage('Field is not exist!')
           .notEmpty()
-          .withMessage(validators.ROLE_IS_EMPTY)
+          .withMessage('Field is not empty!')
           .isArray()
-          .withMessage(validators.ROLE_MUST_BE_ARRAY_TYPE)
+          .withMessage('Field must be array type!')
       default:
         return validationChain
           .exists()
-          .withMessage(validators.ROLE_DOES_NOT_EXIST)
+          .withMessage('Field is not exist!')
           .notEmpty()
-          .withMessage(validators.ROLE_IS_EMPTY)
+          .withMessage('Field is not empty!')
           .isObject()
-          .withMessage(validators.ROLE_MUST_BE_OBJECT_TYPE)
+          .withMessage('Field must be object type!')
     }
   }
 
@@ -96,13 +105,12 @@ export const validationRules = (rules: RuleType[]) => {
       return res.status(400).json({
         isSuccess: false,
         message: 'Error validate request',
-        data: null,
-        meta: {
-          errors: errors.array()
-        }
+        errors: errors.array()
       })
     }
 
     next()
   }
 }
+
+export default validationRules

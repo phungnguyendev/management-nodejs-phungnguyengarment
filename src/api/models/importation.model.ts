@@ -7,9 +7,9 @@ const { INTEGER, STRING, FLOAT, DATE } = DataType
 export type Importation = {
   id?: number
   productID?: number
-  quantity?: number
+  quantity?: number | null
   status?: ItemStatusType
-  dateImported?: Date
+  dateImported?: string | null
 }
 
 @Table({
@@ -32,7 +32,7 @@ export default class ImportationSchema extends Model<Importation> {
   declare quantity: number
 
   @Column({ type: DATE, field: 'date_imported' })
-  declare dateImported: Date
+  declare dateImported: string
 
   @BelongsTo(() => ProductSchema)
   declare product: ProductSchema

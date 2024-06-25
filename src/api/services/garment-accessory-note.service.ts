@@ -1,237 +1,77 @@
+import { getItemsQuery } from '~/helpers/query'
 import GarmentAccessoryNoteSchema, { GarmentAccessoryNote } from '~/models/garment-accessory-note.model'
-import { ItemStatusType, RequestBodyType } from '~/type'
-import logging from '~/utils/logging'
-import { dynamicQuery } from '../helpers/query'
-import AccessoryNoteSchema from '../models/accessory-note.model'
-import GarmentAccessorySchema from '../models/garment-accessory.model'
+import { RequestBodyType } from '~/type'
 
 const NAMESPACE = 'services/garment-accessory-note'
 
-export const createNewItem = async (item: GarmentAccessoryNote): Promise<GarmentAccessoryNoteSchema> => {
+export const createNewItem = async (item: GarmentAccessoryNote) => {
   try {
-    return await GarmentAccessoryNoteSchema.create({ ...item })
+    const newItem = await GarmentAccessoryNoteSchema.create(item)
+    return newItem
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${NAMESPACE} ${error}`)
-  }
-}
-
-export const createNewItems = async (items: GarmentAccessoryNote[]): Promise<GarmentAccessoryNoteSchema[]> => {
-  try {
-    return await GarmentAccessoryNoteSchema.bulkCreate(items)
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${NAMESPACE} ${error}`)
-  }
-}
-
-export const createOrUpdateItemByPk = async (
-  id: number,
-  item: GarmentAccessoryNote
-): Promise<GarmentAccessoryNote | GarmentAccessoryNoteSchema | undefined> => {
-  try {
-    const affectedRows = await GarmentAccessoryNoteSchema.update(
-      {
-        ...item
-      },
-      {
-        where: {
-          id: id
-        }
-      }
-    )
-    if (affectedRows[0] > 0) {
-      return item
-    } else {
-      return await GarmentAccessoryNoteSchema.create({ ...item })
-    }
-  } catch (error: any) {
-    logging.error(NAMESPACE, `Error createOrUpdateItemByPk :: ${error}`)
-    throw new Error(`createOrUpdateItemByPk :: ${error}`)
+    throw new Error(`Error creating item: ${error.message}`)
   }
 }
 
 // Get by id
-export const getItemByPk = async (id: number): Promise<GarmentAccessoryNoteSchema | null> => {
+export const getItemByPk = async (id: number) => {
   try {
-    const item = await GarmentAccessoryNoteSchema.findByPk(id, {
-      include: [
-        { model: AccessoryNoteSchema, as: 'accessoryNote' },
-        { model: GarmentAccessorySchema, as: 'garmentAccessory' }
-      ]
-    })
-    return item
+    const itemFound = await GarmentAccessoryNoteSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    return itemFound
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-// Get by id
-export const getItemBy = async (query: { field: string; id: number }): Promise<GarmentAccessoryNoteSchema | null> => {
-  try {
-    const item = await GarmentAccessoryNoteSchema.findOne({
-      where: { [query.field]: query.id },
-      include: [
-        { model: AccessoryNoteSchema, as: 'accessoryNote' },
-        { model: GarmentAccessorySchema, as: 'garmentAccessory' }
-      ]
-    })
-    return item
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${NAMESPACE} ${error}`)
+    throw new Error(`Error getting item: ${error.message}`)
   }
 }
 
 // Get all
-export const getItems = async (
-  body: RequestBodyType
-): Promise<{ count: number; rows: GarmentAccessoryNoteSchema[] }> => {
+export const getItems = async (body: RequestBodyType) => {
   try {
-    const items = await GarmentAccessoryNoteSchema.findAndCountAll({
-      offset: (Number(body.paginator.page) - 1) * Number(body.paginator.pageSize),
-      limit: body.paginator.pageSize === -1 ? undefined : body.paginator.pageSize,
-      order: [[body.sorting.column, body.sorting.direction]],
-      where: dynamicQuery<GarmentAccessoryNote>(body),
-      include: [
-        { model: AccessoryNoteSchema, as: 'accessoryNote' },
-        { model: GarmentAccessorySchema, as: 'garmentAccessory' }
-      ]
-    })
+    const items = await GarmentAccessoryNoteSchema.findAndCountAll(getItemsQuery(body))
     return items
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${NAMESPACE} ${error}`)
-  }
-}
-
-export const getItemsWithStatus = async (status: ItemStatusType): Promise<GarmentAccessoryNoteSchema[]> => {
-  try {
-    const items = await GarmentAccessoryNoteSchema.findAll({
-      where: {
-        status: status
-      }
-    })
-    return items
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
-  }
-}
-
-export const getItemsCount = async (): Promise<number> => {
-  try {
-    return await GarmentAccessoryNoteSchema.count()
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${NAMESPACE} ${error}`)
-  }
-}
-
-export const updateItemsBy = async (
-  query: { field: string; id: number },
-  updatedRecords: GarmentAccessoryNote[]
-): Promise<GarmentAccessoryNote[] | undefined | any> => {
-  try {
-    const existingRecords = await GarmentAccessoryNoteSchema.findAll({
-      where: {
-        [query.field]: query.id
-      }
-    })
-
-    // Tìm các bản ghi cần xoá
-    const recordsToDelete = existingRecords.filter(
-      (existingRecord) =>
-        !updatedRecords.some((updatedRecord) => updatedRecord.accessoryNoteID === existingRecord.accessoryNoteID)
-    )
-
-    // Tìm các bản ghi cần thêm mới
-    const recordsToAdd = updatedRecords.filter(
-      (updatedRecord) =>
-        !existingRecords.some((existingRecord) => existingRecord.accessoryNoteID === updatedRecord.accessoryNoteID)
-    )
-
-    // Xoá các bản ghi không còn trong danh sách
-    await GarmentAccessoryNoteSchema.destroy({
-      where: {
-        accessoryNoteID: recordsToDelete.map((record) => record.accessoryNoteID)
-      }
-    })
-
-    // Thêm mới các bảng ghi mới
-    await GarmentAccessoryNoteSchema.bulkCreate(recordsToAdd)
-
-    // Trả về danh sách cập nhật sau xử lý
-    const updatedList = [...existingRecords.filter((record) => recordsToDelete.includes(record), ...recordsToAdd)]
-    return updatedList
-  } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw new Error(`${error.message}`)
+    throw `Error getting list: ${error.message}`
   }
 }
 
 // Update
-export const updateItemByPk = async (
-  id: number,
-  itemToUpdate: GarmentAccessoryNote
-): Promise<GarmentAccessoryNote | undefined> => {
+export const updateItemByPk = async (id: number, itemToUpdate: GarmentAccessoryNote) => {
   try {
-    const affectedRows = await GarmentAccessoryNoteSchema.update(
-      {
-        ...itemToUpdate
-      },
-      {
-        where: {
-          id: id
-        }
-      }
-    )
-    return affectedRows[0] > 0 ? itemToUpdate : undefined
+    const itemFound = await GarmentAccessoryNoteSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.update(itemToUpdate)
+    return itemToUpdate
   } catch (error: any) {
-    logging.error(NAMESPACE, `Error updateItemByPk :: ${error}`)
-    throw new Error(`updateItemByPk :: ${error}`)
+    throw new Error(`Error updating item: ${error.message}`)
   }
 }
 
-export const updateItemBy = async (
-  query: { field: string; id: number },
-  itemToUpdate: GarmentAccessoryNote
-): Promise<GarmentAccessoryNote | undefined> => {
+export const updateItems = async (itemsUpdate: GarmentAccessoryNote[]) => {
   try {
-    const affectedRows = await GarmentAccessoryNoteSchema.update(
-      {
-        ...itemToUpdate
-      },
-      {
-        where: {
-          [query.field]: query.id
+    const updatedItems = await Promise.all(
+      itemsUpdate.map(async (item) => {
+        const user = await GarmentAccessoryNoteSchema.findByPk(item.id)
+        if (!user) {
+          throw new Error(`Item with id ${item.id} not found`)
         }
-      }
+        await user.update(item)
+        return user
+      })
     )
-    return affectedRows[0] > 0 ? itemToUpdate : undefined
+    return updatedItems
   } catch (error: any) {
-    logging.error(NAMESPACE, `Error updateItemByGarmentAccessoryID :: ${error}`)
-    throw new Error(`updateItemByGarmentAccessoryID :: ${error}`)
+    throw `Error updating multiple item: ${error.message}`
   }
 }
 
 // Delete
-export const deleteItemByPk = async (id: number): Promise<number> => {
+export const deleteItemByPk = async (id: number) => {
   try {
-    const affectedRows = await GarmentAccessoryNoteSchema.destroy({ where: { id: id } })
-    return affectedRows
+    const itemFound = await GarmentAccessoryNoteSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.destroy()
+    return { message: 'Deleted successfully' }
   } catch (error: any) {
-    logging.error(NAMESPACE, `Error deleteItemByPk :: ${error}`)
-    throw new Error(`deleteItemByPk :: ${error}`)
-  }
-}
-
-export const deleteItemBy = async (query: { field: string; id: number }): Promise<number> => {
-  try {
-    return await GarmentAccessoryNoteSchema.destroy({ where: { [query.field]: query.id } })
-  } catch (error: any) {
-    logging.error(NAMESPACE, `Error deleteItemByAccessoryNoteID :: ${error}`)
-    throw new Error(`deleteItemByAccessoryNoteID :: ${error}`)
+    throw new Error(`Error deleting item: ${error.message}`)
   }
 }
