@@ -6,7 +6,6 @@ const { INTEGER, BOOLEAN, STRING } = DataType
 export interface Role {
   id?: number
   role?: string | null // product_manager
-  isAdmin?: boolean | null // product_manager
   shortName?: string | null // Product manager
   desc?: string | null // Quản lý sản phẩm
   status?: ItemStatusType
@@ -23,9 +22,6 @@ export default class RoleSchema extends Model<Role> {
 
   @Column({ type: STRING, field: 'role' })
   declare role: string
-
-  @Column({ type: BOOLEAN, field: 'is_admin' })
-  declare isAdmin: boolean
 
   @Column({ type: STRING, field: 'short_name' })
   declare shortName: string

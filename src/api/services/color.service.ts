@@ -6,10 +6,12 @@ const NAMESPACE = 'services/color'
 
 export const createNewItem = async (item: Color) => {
   try {
+    const itemFound = await ColorSchema.findOne({ where: { name: item.name } })
+    if (itemFound) throw new Error(`Color exist!`)
     const newItem = await ColorSchema.create(item)
     return newItem
   } catch (error: any) {
-    throw new Error(`Error creating item: ${error.message}`)
+    throw `Error creating item: ${error.message}`
   }
 }
 
@@ -20,7 +22,7 @@ export const getItemByPk = async (id: number) => {
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
-    throw new Error(`Error getting item: ${error.message}`)
+    throw `Error getting item: ${error.message}`
   }
 }
 
@@ -42,7 +44,7 @@ export const updateItemByPk = async (id: number, itemToUpdate: Color) => {
     await itemFound.update(itemToUpdate)
     return itemToUpdate
   } catch (error: any) {
-    throw new Error(`Error updating item: ${error.message}`)
+    throw `Error updating item: ${error.message}`
   }
 }
 
@@ -69,9 +71,9 @@ export const deleteItemByPk = async (id: number) => {
   try {
     const itemFound = await ColorSchema.findByPk(id)
     if (!itemFound) throw new Error(`Item not found`)
-    await itemFound.destroy()
+    await itemFound.destroy({ force: true })
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw new Error(`Error deleting item: ${error.message}`)
+    throw `Error deleting item: ${error.message}`
   }
 }

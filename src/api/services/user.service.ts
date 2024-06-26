@@ -19,7 +19,7 @@ export const createNewItem = async (item: User) => {
     })
     return newUser
   } catch (error: any) {
-    throw new Error(`Error creating item: ${error.message}`)
+    throw `Error creating item: ${error.message}`
   }
 }
 
@@ -31,7 +31,7 @@ export const getItemByPk = async (id: number) => {
     delete itemFound.dataValues.password
     return itemFound.dataValues
   } catch (error: any) {
-    throw new Error(`Error getting item: ${error.message}`)
+    throw `Error getting item: ${error.message}`
   }
 }
 
@@ -53,7 +53,7 @@ export const updateItemByPk = async (id: number, itemToUpdate: User) => {
     await itemFound.update(itemToUpdate)
     return itemToUpdate
   } catch (error: any) {
-    throw new Error(`Error updating item: ${error.message}`)
+    throw `Error updating item: ${error.message}`
   }
 }
 
@@ -90,6 +90,6 @@ export const deleteItemByPk = async (id: number) => {
     })
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw new Error(`Error deleting item: ${error.message}`)
+    throw `Error deleting item: ${error.message}`
   }
 }

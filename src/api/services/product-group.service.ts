@@ -24,6 +24,16 @@ export const getItemByPk = async (id: number) => {
   }
 }
 
+export const getItemByProductID = async (productID: number) => {
+  try {
+    const itemFound = await ProductGroupSchema.findOne({ where: { productID } })
+    if (!itemFound) throw new Error(`Item not found`)
+    return itemFound
+  } catch (error: any) {
+    throw new Error(`Error getting item: ${error.message}`)
+  }
+}
+
 // Get all
 export const getItems = async (body: RequestBodyType) => {
   try {
@@ -38,6 +48,18 @@ export const getItems = async (body: RequestBodyType) => {
 export const updateItemByPk = async (id: number, itemToUpdate: ProductGroup) => {
   try {
     const itemFound = await ProductGroupSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.update(itemToUpdate)
+    return itemToUpdate
+  } catch (error: any) {
+    throw new Error(`Error updating item: ${error.message}`)
+  }
+}
+
+// Update
+export const updateItemByProductID = async (productID: number, itemToUpdate: ProductGroup) => {
+  try {
+    const itemFound = await ProductGroupSchema.findOne({ where: { productID } })
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.update(itemToUpdate)
     return itemToUpdate
@@ -68,6 +90,17 @@ export const updateItems = async (itemsUpdate: ProductGroup[]) => {
 export const deleteItemByPk = async (id: number) => {
   try {
     const itemFound = await ProductGroupSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.destroy()
+    return { message: 'Deleted successfully' }
+  } catch (error: any) {
+    throw new Error(`Error deleting item: ${error.message}`)
+  }
+}
+
+export const deleteItemByProductID = async (productID: number) => {
+  try {
+    const itemFound = await ProductGroupSchema.findOne({ where: { productID } })
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.destroy()
     return { message: 'Deleted successfully' }

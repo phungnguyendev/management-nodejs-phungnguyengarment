@@ -1,8 +1,9 @@
-import { Request, Response } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import appConfig from '~/config/app.config'
 import * as authService from '~/services/auth/auth.service'
 import * as tokenService from '~/services/auth/token.service'
+import * as userRoleService from '~/services/user-role.service'
 import * as userService from '~/services/user.service'
 
 const PATH = 'Auth'
@@ -17,19 +18,27 @@ export const login = async (req: Request, res: Response) => {
   }
 }
 
-export const getUserInfoFromAccessToken = async (req: Request, res: Response) => {
+export const getUserInfoFromAccessToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const authToken = req.headers['authorization']
     if (!authToken) throw new Error(`Token not found!`)
     const [Bearer, token] = authToken.split(' ')
     if (Bearer !== 'Bearer') throw new Error('Invalid token format!')
     jwt.verify(token, appConfig.secret.accessKey, async (err, payload: any) => {
+      if (err?.message === 'jwt expired')
+        return res.formatter.badRequest({ message: 'Login session has expired, please log in again!' })
       if (err) return res.formatter.forbidden({})
       const userFound = await userService.getItemByPk(payload.userID)
-      return res.formatter.ok({ data: userFound })
+      const userRolesFound = await userRoleService.getItemByUserID(payload.userID)
+      return res.formatter.ok({
+        data: {
+          user: userFound,
+          userRoles: userRolesFound
+        }
+      })
     })
   } catch (error: any) {
-    return res.formatter.badRequest({ message: `${error.message}` })
+    next(error)
   }
 }
 

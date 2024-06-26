@@ -17,6 +17,12 @@ router.post(
 // Get item by productID and importedID
 router.get('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.getItemByPk)
 
+router.get(
+  '/productID/:productID',
+  validationRules([{ field: 'productID', type: 'int', location: 'params' }]),
+  controller.getItemByProductID
+)
+
 // Get all items
 router.post(
   '/find',
@@ -34,7 +40,18 @@ router.put('/', controller.updateItems)
 // Update item by productID and importedID
 router.patch('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.updateItemByPk)
 
+router.patch(
+  '/productID/:productID',
+  validationRules([{ field: 'productID', type: 'int', location: 'params' }]),
+  controller.updateItemByProductID
+)
 // Delete item by productID
 router.delete('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.deleteItemByPk)
+
+router.delete(
+  'productID/:productID',
+  validationRules([{ field: 'productID', type: 'int', location: 'params' }]),
+  controller.deleteItemByProductID
+)
 
 export default router

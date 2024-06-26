@@ -21,8 +21,18 @@ export const createNewItem = async (req: Request, res: Response, next: NextFunct
 export const getItemByPk = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = Number(req.params.id)
-    const itemFound = await service.getItemByPk(id)
-    return res.formatter.ok({ data: itemFound })
+    const itemsFound = await service.getItemByPk(id)
+    return res.formatter.ok({ data: itemsFound })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const getItemsByUserID = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userID = Number(req.params.userID)
+    const itemsFound = await service.getItemByUserID(userID)
+    return res.formatter.ok({ data: itemsFound })
   } catch (error) {
     next(error)
   }
@@ -60,6 +70,19 @@ export const updateItemByPk = async (req: Request, res: Response, next: NextFunc
   }
 }
 
+export const updateItemByUserID = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userID = Number(req.params.userID)
+    const itemRequest: UserRole = {
+      ...req.body
+    }
+    const itemUpdated = await service.updateItemByUserID(userID, itemRequest)
+    return res.formatter.ok({ data: itemUpdated })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const updateItems = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const itemRequest: UserRole[] = req.body
@@ -73,7 +96,17 @@ export const updateItems = async (req: Request, res: Response, next: NextFunctio
 export const deleteItemByPk = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = Number(req.params.id)
-    await service.deleteItemByPk(id)
+    const destroyed = await service.deleteItemByPk(id)
+    return res.formatter.ok({ message: destroyed.message })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const deleteItemByUserID = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userID = Number(req.params.userID)
+    await service.deleteItemByUserID(userID)
     return res.formatter.ok({})
   } catch (error) {
     next(error)

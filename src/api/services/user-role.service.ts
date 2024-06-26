@@ -24,6 +24,17 @@ export const getItemByPk = async (id: number) => {
   }
 }
 
+// Get by id
+export const getItemByUserID = async (userID: number) => {
+  try {
+    const itemsFound = await UserRoleSchema.findAll({ where: { userID } })
+    if (!itemsFound) throw new Error(`Item not found`)
+    return itemsFound
+  } catch (error: any) {
+    throw new Error(`Error getting item: ${error.message}`)
+  }
+}
+
 // Get all
 export const getItems = async (body: RequestBodyType) => {
   try {
@@ -38,6 +49,17 @@ export const getItems = async (body: RequestBodyType) => {
 export const updateItemByPk = async (id: number, itemToUpdate: UserRole) => {
   try {
     const itemFound = await UserRoleSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.update(itemToUpdate)
+    return itemToUpdate
+  } catch (error: any) {
+    throw new Error(`Error updating item: ${error.message}`)
+  }
+}
+
+export const updateItemByUserID = async (userID: number, itemToUpdate: UserRole) => {
+  try {
+    const itemFound = await UserRoleSchema.findOne({ where: { userID } })
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.update(itemToUpdate)
     return itemToUpdate
@@ -68,6 +90,18 @@ export const updateItems = async (itemsUpdate: UserRole[]) => {
 export const deleteItemByPk = async (id: number) => {
   try {
     const itemFound = await UserRoleSchema.findByPk(id)
+    if (!itemFound) throw new Error(`Item not found`)
+    await itemFound.destroy()
+    return { message: 'Deleted successfully' }
+  } catch (error: any) {
+    throw new Error(`Error deleting item: ${error.message}`)
+  }
+}
+
+// Delete
+export const deleteItemByUserID = async (userID: number) => {
+  try {
+    const itemFound = await UserRoleSchema.findOne({ where: { userID } })
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.destroy()
     return { message: 'Deleted successfully' }

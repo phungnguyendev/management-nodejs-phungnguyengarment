@@ -28,6 +28,16 @@ export const getItemByPk = async (req: Request, res: Response, next: NextFunctio
   }
 }
 
+export const getItemByProductID = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const productID = Number(req.params.productID)
+    const itemFound = await service.getItemByProductID(productID)
+    return res.formatter.ok({ data: itemFound })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const getItems = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const bodyRequest: RequestBodyType = {
@@ -60,6 +70,19 @@ export const updateItemByPk = async (req: Request, res: Response, next: NextFunc
   }
 }
 
+export const updateItemByProductID = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const productID = Number(req.params.productID)
+    const itemRequest: Completion = {
+      ...req.body
+    }
+    const itemUpdated = await service.updateItemByProductID(productID, itemRequest)
+    return res.formatter.ok({ data: itemUpdated })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const updateItems = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const itemRequest: Completion[] = req.body
@@ -73,7 +96,17 @@ export const updateItems = async (req: Request, res: Response, next: NextFunctio
 export const deleteItemByPk = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = Number(req.params.id)
-    await service.deleteItemByPk(id)
+    const destroyed = await service.deleteItemByPk(id)
+    return res.formatter.ok({ message: destroyed.message })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const deleteItemByProductID = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const productID = Number(req.params.productID)
+    await service.deleteItemByProductID(productID)
     return res.formatter.ok({})
   } catch (error) {
     next(error)

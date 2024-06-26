@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { authentication, authenticationAdmin } from '~/middleware/auth.middleware'
+import { authentication } from '~/middleware/auth.middleware'
 import accessoryNoteRoute from '~/routes/accessory-note.route'
 import authRoute from '~/routes/auth/auth.route'
 import colorRoute from '~/routes/color.route'
