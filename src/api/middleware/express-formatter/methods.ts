@@ -50,7 +50,7 @@ const methods: Method[] = [
   {
     type: 'ok',
     status: 200,
-    message: 'Ok'
+    message: 'Success'
   },
   {
     type: 'created',

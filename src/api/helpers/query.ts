@@ -26,4 +26,4 @@ const getItemsQuery = <T>(body: RequestBodyType): FindAndCountOptions => {
   }
 }
 
-export { getItemsQuery }
+export { dynamicQuery, getItemsQuery }

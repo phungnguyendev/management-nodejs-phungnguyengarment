@@ -4,14 +4,7 @@ import validationRules from '~/middleware/request-validator'
 
 const router = Router()
 
-router.post(
-  '/',
-  validationRules([
-    { field: 'title', type: 'string', location: 'body' },
-    { field: 'summary', type: 'string', location: 'body' }
-  ]),
-  controller.createNewItem
-)
+router.post('/', validationRules([{ field: 'title', type: 'string', location: 'body' }]), controller.createNewItem)
 
 // Get item by productID and importedID
 router.get('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.getItemByPk)
@@ -27,8 +20,6 @@ router.post(
   ]),
   controller.getItems
 )
-
-router.put('/', controller.updateItems)
 
 // Update item by productID and importedID
 router.patch('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.updateItemByPk)

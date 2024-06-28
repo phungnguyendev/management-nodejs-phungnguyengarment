@@ -34,7 +34,11 @@ router.post(
   controller.getItems
 )
 
-router.put('/', controller.updateItems)
+router.put(
+  '/userID/:userID',
+  validationRules([{ field: 'userID', type: 'int', location: 'params' }]),
+  controller.updateItemsByUserID
+)
 
 // Update item by productID and importedID
 router.patch('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.updateItemByPk)

@@ -83,10 +83,11 @@ export const updateItemByProductID = async (req: Request, res: Response, next: N
   }
 }
 
-export const updateItems = async (req: Request, res: Response, next: NextFunction) => {
+export const updateItemsByProductID = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const itemRequest: SewingLineDelivery[] = req.body
-    const updatedItems = await service.updateItems(itemRequest)
+    const productID = Number(req.params.productID)
+    const records = req.body as SewingLineDelivery[]
+    const updatedItems = await service.updateItemsBy({ field: 'productID', id: productID }, records)
     return res.formatter.ok({ data: updatedItems })
   } catch (error) {
     next(error)

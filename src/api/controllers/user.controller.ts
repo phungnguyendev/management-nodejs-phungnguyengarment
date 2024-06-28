@@ -9,7 +9,7 @@ export const createNewItem = async (req: Request, res: Response, next: NextFunct
   try {
     const dataRequest: User = {
       ...req.body,
-      status: 'pending'
+      status: 'active'
     }
     const newItem = await service.createNewItem(dataRequest)
     return res.formatter.created({ data: newItem })
@@ -55,16 +55,6 @@ export const updateItemByPk = async (req: Request, res: Response, next: NextFunc
     }
     const itemUpdated = await service.updateItemByPk(id, itemRequest)
     return res.formatter.ok({ data: itemUpdated })
-  } catch (error) {
-    next(error)
-  }
-}
-
-export const updateItems = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const itemRequest: User[] = req.body
-    const updatedItems = await service.updateItems(itemRequest)
-    return res.formatter.ok({ data: updatedItems })
   } catch (error) {
     next(error)
   }

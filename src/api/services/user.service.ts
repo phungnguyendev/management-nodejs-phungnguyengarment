@@ -1,10 +1,10 @@
 import appConfig from '~/config/app.config'
-import { mailOptionVerifyOTPCode, transporter } from '~/config/nodemailer.config'
+import { mailOptionToSendUserInfo, transporter } from '~/config/nodemailer.config'
 import { getItemsQuery } from '~/helpers/query'
 import UserSchema, { User } from '~/models/user.model'
 import { RequestBodyType } from '~/type'
 import TokenSchema from '../models/token.model'
-import { otpGenerator } from '../utils'
+import UserRoleSchema from '../models/user-role.model'
 
 const NAMESPACE = 'services/user'
 
@@ -13,10 +13,7 @@ export const createNewItem = async (item: User) => {
     const userFound = await UserSchema.findOne({ where: { email: item.email } })
     if (userFound) throw new Error(`User already exists!`)
     const newUser = await UserSchema.create(item)
-    const otp = otpGenerator()
-    await transporter.sendMail(mailOptionVerifyOTPCode(newUser.email, otp)).then(() => {
-      newUser.update({ otp: otp })
-    })
+    await transporter.sendMail(mailOptionToSendUserInfo(newUser.email, newUser))
     return newUser
   } catch (error: any) {
     throw `Error creating item: ${error.message}`
@@ -81,12 +78,20 @@ export const deleteItemByPk = async (id: number) => {
     const itemFound = await UserSchema.findByPk(id)
     if (!itemFound) throw new Error(`Item not found`)
     if (itemFound.email === appConfig.admin.mail.trim()) throw new Error(`The user is an admin, cannot be deleted!`)
-    await TokenSchema.destroy({
-      where: {
-        userID: itemFound.id
+    const tokenFound = await TokenSchema.findOne({ where: { userID: id } })
+    const userRolesFound = await UserRoleSchema.findAll({ where: { userID: id } })
+    if (tokenFound) {
+      await tokenFound.destroy().catch(() => {
+        throw new Error(`Error delete token`)
+      })
+    }
+    await UserRoleSchema.destroy({ where: { roleID: userRolesFound.map((item) => item.roleID), userID: id } }).catch(
+      () => {
+        throw new Error(`Error delete user role`)
       }
-    }).then(async () => {
-      await itemFound.destroy()
+    )
+    await itemFound.destroy().catch(() => {
+      throw new Error(`Error delete user`)
     })
     return { message: 'Deleted successfully' }
   } catch (error: any) {

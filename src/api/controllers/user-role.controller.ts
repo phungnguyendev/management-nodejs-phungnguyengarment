@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
-import { UserRole } from '~/models/user-role.model'
 import * as service from '~/services/user-role.service'
 import { RequestBodyType } from '~/type'
+import { UserRole } from '../models/user-role.model'
 
 const NAMESPACE = 'controllers/user-role'
 
@@ -83,10 +83,11 @@ export const updateItemByUserID = async (req: Request, res: Response, next: Next
   }
 }
 
-export const updateItems = async (req: Request, res: Response, next: NextFunction) => {
+export const updateItemsByUserID = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const itemRequest: UserRole[] = req.body
-    const updatedItems = await service.updateItems(itemRequest)
+    const userID = Number(req.params.userID)
+    const records = req.body as UserRole[]
+    const updatedItems = await service.updateItemsBy({ field: 'userID', id: userID }, records)
     return res.formatter.ok({ data: updatedItems })
   } catch (error) {
     next(error)

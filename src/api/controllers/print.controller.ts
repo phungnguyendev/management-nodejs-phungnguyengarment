@@ -60,16 +60,6 @@ export const updateItemByPk = async (req: Request, res: Response, next: NextFunc
   }
 }
 
-export const updateItems = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const itemRequest: Print[] = req.body
-    const updatedItems = await service.updateItems(itemRequest)
-    return res.formatter.ok({ data: updatedItems })
-  } catch (error) {
-    next(error)
-  }
-}
-
 export const deleteItemByPk = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = Number(req.params.id)

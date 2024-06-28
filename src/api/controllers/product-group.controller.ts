@@ -83,16 +83,6 @@ export const updateItemByProductID = async (req: Request, res: Response, next: N
   }
 }
 
-export const updateItems = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const itemRequest: ProductGroup[] = req.body
-    const updatedItems = await service.updateItems(itemRequest)
-    return res.formatter.ok({ data: updatedItems })
-  } catch (error) {
-    next(error)
-  }
-}
-
 export const deleteItemByPk = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = Number(req.params.id)
