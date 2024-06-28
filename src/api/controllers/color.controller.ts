@@ -13,7 +13,7 @@ export const createNewItem = async (req: Request, res: Response, next: NextFunct
     }
     const newItem = await service.createNewItem(dataRequest)
     return res.formatter.created({ data: newItem })
-  } catch (error) {
+  } catch (error: any) {
     next(error)
   }
 }

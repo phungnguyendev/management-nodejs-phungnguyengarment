@@ -6,7 +6,7 @@ const NAMESPACE = 'services/color'
 
 export const createNewItem = async (item: Color) => {
   try {
-    const itemFound = await ColorSchema.findOne({ where: { name: item.name } })
+    const itemFound = await ColorSchema.findOne({ where: { name: item.name?.trim() } })
     if (itemFound) throw new Error(`Color exist!`)
     const newItem = await ColorSchema.create(item)
     return newItem
@@ -72,7 +72,7 @@ export const deleteItemByPk = async (id: number) => {
     const itemFound = await ColorSchema.findByPk(id)
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.destroy({ force: true })
-    return { message: 'Deleted successfully' }
+    return { message: 'Deleted successfully!' }
   } catch (error: any) {
     throw `Error deleting item: ${error.message}`
   }
