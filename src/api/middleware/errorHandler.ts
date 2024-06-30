@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
+import { EagerLoadingError } from 'sequelize'
 
-const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(`Error: ${err.message || 'Unknown error'}`)
   console.error(err.stack)
 

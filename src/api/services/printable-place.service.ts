@@ -1,6 +1,7 @@
-import { getItemsQuery } from '~/helpers/query'
+import { dynamicQuery } from '~/helpers/query'
 import PrintablePlaceSchema, { PrintablePlace } from '~/models/printable-place.model'
 import { RequestBodyType } from '~/type'
+import PrintSchema from '../models/print.model'
 
 const NAMESPACE = 'services/printable-place'
 
@@ -37,7 +38,13 @@ export const getItemByProductID = async (productID: number) => {
 // Get all
 export const getItems = async (body: RequestBodyType) => {
   try {
-    const items = await PrintablePlaceSchema.findAndCountAll(getItemsQuery(body))
+    const items = await PrintablePlaceSchema.findAndCountAll({
+      offset: (Number(body.paginator.page) - 1) * Number(body.paginator.pageSize),
+      limit: body.paginator.pageSize === -1 ? undefined : body.paginator.pageSize,
+      order: [[body.sorting.column, body.sorting.direction]],
+      where: dynamicQuery<PrintablePlace>(body),
+      include: [{ model: PrintSchema, as: 'print' }]
+    })
     return items
   } catch (error: any) {
     throw `Error getting list: ${error.message}`

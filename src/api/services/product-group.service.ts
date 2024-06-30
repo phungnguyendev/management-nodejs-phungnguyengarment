@@ -1,6 +1,7 @@
-import { getItemsQuery } from '~/helpers/query'
+import { dynamicQuery, getItemsQuery } from '~/helpers/query'
 import ProductGroupSchema, { ProductGroup } from '~/models/product-group.model'
 import { RequestBodyType } from '~/type'
+import GroupSchema from '../models/group.model'
 
 const NAMESPACE = 'services/product-group'
 
@@ -37,7 +38,13 @@ export const getItemByProductID = async (productID: number) => {
 // Get all
 export const getItems = async (body: RequestBodyType) => {
   try {
-    const items = await ProductGroupSchema.findAndCountAll(getItemsQuery(body))
+    const items = await ProductGroupSchema.findAndCountAll({
+      offset: (Number(body.paginator.page) - 1) * Number(body.paginator.pageSize),
+      limit: body.paginator.pageSize === -1 ? undefined : body.paginator.pageSize,
+      order: [[body.sorting.column, body.sorting.direction]],
+      where: dynamicQuery<ProductGroup>(body),
+      include: [{ model: GroupSchema, as: 'group' }]
+    })
     return items
   } catch (error: any) {
     throw `Error getting list: ${error.message}`

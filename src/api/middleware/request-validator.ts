@@ -74,7 +74,7 @@ const validationRules = (rules: RuleType[]) => {
           .withMessage('Field is not exist!')
           .notEmpty()
           .withMessage('Field is not empty!')
-          .isDate()
+          .isString()
           .withMessage('Field must be date type!')
       case 'array':
         return validationChain

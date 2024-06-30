@@ -1,12 +1,13 @@
-import { getItemsQuery } from '~/helpers/query'
 import ProductColorSchema, { ProductColor } from '~/models/product-color.model'
 import { RequestBodyType } from '~/type'
+import { dynamicQuery } from '../helpers/query'
+import ColorSchema from '../models/color.model'
 
 const NAMESPACE = 'services/product-color'
 
 export const createNewItem = async (item: ProductColor) => {
   try {
-    const newItem = await ProductColorSchema.create(item)
+    const newItem = await ProductColorSchema.create(item, { include: [{ model: ColorSchema, as: 'Color' }] })
     return newItem
   } catch (error: any) {
     throw new Error(`Error creating item: ${error.message}`)
@@ -16,7 +17,7 @@ export const createNewItem = async (item: ProductColor) => {
 // Get by id
 export const getItemByPk = async (id: number) => {
   try {
-    const itemFound = await ProductColorSchema.findByPk(id)
+    const itemFound = await ProductColorSchema.findByPk(id, { include: [{ model: ColorSchema, as: 'Color' }] })
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
@@ -26,7 +27,10 @@ export const getItemByPk = async (id: number) => {
 
 export const getItemByProductID = async (productID: number) => {
   try {
-    const itemFound = await ProductColorSchema.findOne({ where: { productID } })
+    const itemFound = await ProductColorSchema.findOne({
+      where: { productID },
+      include: [{ model: ColorSchema, as: 'Color' }]
+    })
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
@@ -37,7 +41,13 @@ export const getItemByProductID = async (productID: number) => {
 // Get all
 export const getItems = async (body: RequestBodyType) => {
   try {
-    const items = await ProductColorSchema.findAndCountAll(getItemsQuery(body))
+    const items = await ProductColorSchema.findAndCountAll({
+      offset: (Number(body.paginator.page) - 1) * Number(body.paginator.pageSize),
+      limit: body.paginator.pageSize === -1 ? undefined : body.paginator.pageSize,
+      order: [[body.sorting.column, body.sorting.direction]],
+      where: dynamicQuery<ProductColor>(body),
+      include: [{ model: ColorSchema, as: 'color' }]
+    })
     return items
   } catch (error: any) {
     throw `Error getting list: ${error.message}`
@@ -59,7 +69,10 @@ export const updateItemByPk = async (id: number, itemToUpdate: ProductColor) => 
 // Update
 export const updateItemByProductID = async (productID: number, itemToUpdate: ProductColor) => {
   try {
-    const itemFound = await ProductColorSchema.findOne({ where: { productID } })
+    const itemFound = await ProductColorSchema.findOne({
+      where: { productID },
+      include: [{ model: ColorSchema, as: 'Color' }]
+    })
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.update(itemToUpdate)
     return itemToUpdate
@@ -72,7 +85,7 @@ export const updateItems = async (itemsUpdate: ProductColor[]) => {
   try {
     const updatedItems = await Promise.all(
       itemsUpdate.map(async (item) => {
-        const user = await ProductColorSchema.findByPk(item.id)
+        const user = await ProductColorSchema.findByPk(item.id, { include: [{ model: ColorSchema, as: 'Color' }] })
         if (!user) {
           throw new Error(`Item with id ${item.id} not found`)
         }
