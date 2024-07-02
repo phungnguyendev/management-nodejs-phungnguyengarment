@@ -51,7 +51,7 @@ export const updateItemByPk = async (id: number, itemToUpdate: Product) => {
     const itemFound = await ProductSchema.findByPk(id)
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.update(itemToUpdate)
-    return itemToUpdate
+    return itemFound
   } catch (error: any) {
     throw new Error(`Error updating item: ${error.message}`)
   }

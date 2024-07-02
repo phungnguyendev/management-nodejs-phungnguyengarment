@@ -6,6 +6,8 @@ const NAMESPACE = 'services/sample-sewing'
 
 export const createNewItem = async (item: SampleSewing) => {
   try {
+    const itemFound = await SampleSewingSchema.findOne({ where: { productID: item.productID } })
+    if (itemFound) throw new Error('Data already exist!')
     const newItem = await SampleSewingSchema.create(item)
     return newItem
   } catch (error: any) {
@@ -66,24 +68,6 @@ export const updateItemByProductID = async (productID: number, itemToUpdate: Sam
     return itemToUpdate
   } catch (error: any) {
     throw new Error(`Error updating item: ${error.message}`)
-  }
-}
-
-export const updateItems = async (itemsUpdate: SampleSewing[]) => {
-  try {
-    const updatedItems = await Promise.all(
-      itemsUpdate.map(async (item) => {
-        const user = await SampleSewingSchema.findByPk(item.id)
-        if (!user) {
-          throw new Error(`Item with id ${item.id} not found`)
-        }
-        await user.update(item)
-        return user
-      })
-    )
-    return updatedItems
-  } catch (error: any) {
-    throw `Error updating multiple item: ${error.message}`
   }
 }
 

@@ -37,10 +37,10 @@ export default class CompletionSchema extends Model<Completion> {
   @Column({ type: FLOAT, field: 'quantity_packaged' })
   declare quantityPackaged: string
 
-  @Column({ type: DATE, field: 'exported_date' })
+  @Column({ type: STRING, field: 'exported_date' })
   declare exportedDate: string
 
-  @Column({ type: DATE, field: 'pass_fi_date' })
+  @Column({ type: STRING, field: 'pass_fi_date' })
   declare passFIDate: string
 
   @Column({ type: STRING, field: 'status' })

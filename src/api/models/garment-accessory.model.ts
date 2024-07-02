@@ -29,7 +29,7 @@ export default class GarmentAccessorySchema extends Model<GarmentAccessory> {
   @Column({ type: FLOAT, field: 'amount_cutting' })
   declare amountCutting: number
 
-  @Column({ type: DATE, field: 'passing_delivery_date' })
+  @Column({ type: STRING, field: 'passing_delivery_date' })
   declare passingDeliveryDate: string
 
   @Column({ type: STRING, field: 'status' })

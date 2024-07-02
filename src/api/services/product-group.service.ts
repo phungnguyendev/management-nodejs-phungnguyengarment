@@ -1,4 +1,4 @@
-import { dynamicQuery, getItemsQuery } from '~/helpers/query'
+import { dynamicQuery } from '~/helpers/query'
 import ProductGroupSchema, { ProductGroup } from '~/models/product-group.model'
 import { RequestBodyType } from '~/type'
 import GroupSchema from '../models/group.model'
@@ -7,6 +7,8 @@ const NAMESPACE = 'services/product-group'
 
 export const createNewItem = async (item: ProductGroup) => {
   try {
+    const itemFound = await ProductGroupSchema.findOne({ where: { productID: item.productID } })
+    if (itemFound) throw new Error(`Data already exist!`)
     const newItem = await ProductGroupSchema.create(item)
     return newItem
   } catch (error: any) {
@@ -17,7 +19,7 @@ export const createNewItem = async (item: ProductGroup) => {
 // Get by id
 export const getItemByPk = async (id: number) => {
   try {
-    const itemFound = await ProductGroupSchema.findByPk(id)
+    const itemFound = await ProductGroupSchema.findByPk(id, { include: [{ model: GroupSchema, as: 'group' }] })
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
@@ -27,7 +29,10 @@ export const getItemByPk = async (id: number) => {
 
 export const getItemByProductID = async (productID: number) => {
   try {
-    const itemFound = await ProductGroupSchema.findOne({ where: { productID } })
+    const itemFound = await ProductGroupSchema.findOne({
+      where: { productID },
+      include: [{ model: GroupSchema, as: 'group' }]
+    })
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {

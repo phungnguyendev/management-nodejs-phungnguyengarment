@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { ProductGroup } from '~/models/product-group.model'
+import * as groupService from '~/services/group.service'
 import * as service from '~/services/product-group.service'
 import { RequestBodyType } from '~/type'
 
@@ -12,7 +13,8 @@ export const createNewItem = async (req: Request, res: Response, next: NextFunct
       status: req.body.status ?? 'active'
     }
     const newItem = await service.createNewItem(dataRequest)
-    return res.formatter.created({ data: newItem })
+    const groupFound = await groupService.getItemByPk(newItem.groupID)
+    return res.formatter.created({ data: { ...newItem.dataValues, group: groupFound.dataValues } })
   } catch (error) {
     next(error)
   }

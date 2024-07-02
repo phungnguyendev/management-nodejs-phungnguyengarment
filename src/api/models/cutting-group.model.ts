@@ -51,10 +51,10 @@ export default class CuttingGroupSchema extends Model<CuttingGroup> {
   @Column({ type: FLOAT, field: 'quantity_real_cut' })
   declare quantityRealCut: string
 
-  @Column({ type: DATE, field: 'date_time_cut' })
+  @Column({ type: STRING, field: 'date_time_cut' })
   declare dateTimeCut: string
 
-  @Column({ type: DATE, field: 'date_send_embroidered' })
+  @Column({ type: STRING, field: 'date_send_embroidered' })
   declare dateSendEmbroidered: string
 
   @Column({ type: FLOAT, field: 'quantity_delivered_btp' })
@@ -66,52 +66,52 @@ export default class CuttingGroupSchema extends Model<CuttingGroup> {
   @Column({ type: BOOLEAN, field: 'sync_status' })
   declare syncStatus: boolean
 
-  @Column({ type: DATE, field: 'date_arrived_1th' })
+  @Column({ type: STRING, field: 'date_arrived_1th' })
   declare dateArrived1Th: string
   @Column({ type: FLOAT, field: 'quantity_arrived_1th' })
   declare quantityArrived1Th: number
 
-  @Column({ type: DATE, field: 'date_arrived_2th' })
+  @Column({ type: STRING, field: 'date_arrived_2th' })
   declare dateArrived2Th: string
   @Column({ type: FLOAT, field: 'quantity_arrived_2th' })
   declare quantityArrived2Th: number
 
-  @Column({ type: DATE, field: 'date_arrived_3th' })
+  @Column({ type: STRING, field: 'date_arrived_3th' })
   declare dateArrived3Th: string
   @Column({ type: FLOAT, field: 'quantity_arrived_3th' })
   declare quantityArrived3Th: number
 
-  @Column({ type: DATE, field: 'date_arrived_4th' })
+  @Column({ type: STRING, field: 'date_arrived_4th' })
   declare dateArrived4Th: string
   @Column({ type: FLOAT, field: 'quantity_arrived_4th' })
   declare quantityArrived4Th: number
 
-  @Column({ type: DATE, field: 'date_arrived_5th' })
+  @Column({ type: STRING, field: 'date_arrived_5th' })
   declare dateArrived5Th: string
   @Column({ type: FLOAT, field: 'quantity_arrived_5th' })
   declare quantityArrived5Th: number
 
-  @Column({ type: DATE, field: 'date_arrived_6th' })
+  @Column({ type: STRING, field: 'date_arrived_6th' })
   declare dateArrived6Th: string
   @Column({ type: FLOAT, field: 'quantity_arrived_6th' })
   declare quantityArrived6Th: number
 
-  @Column({ type: DATE, field: 'date_arrived_7th' })
+  @Column({ type: STRING, field: 'date_arrived_7th' })
   declare dateArrived7Th: string
   @Column({ type: FLOAT, field: 'quantity_arrived_7th' })
   declare quantityArrived7Th: number
 
-  @Column({ type: DATE, field: 'date_arrived_8th' })
+  @Column({ type: STRING, field: 'date_arrived_8th' })
   declare dateArrived8Th: string
   @Column({ type: FLOAT, field: 'quantity_arrived_8th' })
   declare quantityArrived8Th: number
 
-  @Column({ type: DATE, field: 'date_arrived_th' })
+  @Column({ type: STRING, field: 'date_arrived_th' })
   declare dateArrived9Th: string
   @Column({ type: FLOAT, field: 'quantity_arrived_9th' })
   declare quantityArrived9Th: number
 
-  @Column({ type: DATE, field: 'date_arrived_10th' })
+  @Column({ type: STRING, field: 'date_arrived_10th' })
   declare dateArrived10Th: string
   @Column({ type: FLOAT, field: 'quantity_arrived_10th' })
   declare quantityArrived10Th: number

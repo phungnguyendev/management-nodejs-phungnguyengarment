@@ -2,7 +2,7 @@ import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from 'sequelize
 import { ItemStatusType } from '~/type'
 import ProductSchema from './product.model'
 
-const { INTEGER, STRING, DATE } = DataType
+const { INTEGER, STRING } = DataType
 
 export type SampleSewing = {
   id?: number
@@ -31,28 +31,28 @@ export default class SampleSewingSchema extends Model<SampleSewing> {
   @ForeignKey(() => ProductSchema)
   declare productID: string
 
-  @Column({ type: DATE, field: 'date_submission_npl' })
+  @Column({ type: STRING, field: 'date_submission_npl' })
   declare dateSubmissionNPL: string
 
-  @Column({ type: DATE, field: 'date_approval_so' })
+  @Column({ type: STRING, field: 'date_approval_so' })
   declare dateApprovalSO: string
 
-  @Column({ type: DATE, field: 'date_approval_pp' })
+  @Column({ type: STRING, field: 'date_approval_pp' })
   declare dateApprovalPP: string
 
-  @Column({ type: DATE, field: 'date_submission_first_time' })
+  @Column({ type: STRING, field: 'date_submission_first_time' })
   declare dateSubmissionFirstTime: string
 
-  @Column({ type: DATE, field: 'date_submission_second_time' })
+  @Column({ type: STRING, field: 'date_submission_second_time' })
   declare dateSubmissionSecondTime: string
 
-  @Column({ type: DATE, field: 'date_submission_third_time' })
+  @Column({ type: STRING, field: 'date_submission_third_time' })
   declare dateSubmissionThirdTime: string
 
-  @Column({ type: DATE, field: 'date_submission_forth_time' })
+  @Column({ type: STRING, field: 'date_submission_forth_time' })
   declare dateSubmissionForthTime: string
 
-  @Column({ type: DATE, field: 'date_submission_fifth_time' })
+  @Column({ type: STRING, field: 'date_submission_fifth_time' })
   declare dateSubmissionFifthTime: string
 
   @Column({ type: STRING, field: 'status' })

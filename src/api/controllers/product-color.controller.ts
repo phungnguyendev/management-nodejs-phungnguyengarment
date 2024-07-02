@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { ProductColor } from '~/models/product-color.model'
+import * as colorService from '~/services/color.service'
 import * as service from '~/services/product-color.service'
 import { RequestBodyType } from '~/type'
 
@@ -12,7 +13,8 @@ export const createNewItem = async (req: Request, res: Response, next: NextFunct
       status: req.body.status ?? 'active'
     }
     const newItem = await service.createNewItem(dataRequest)
-    return res.formatter.created({ data: newItem })
+    const colorItem = await colorService.getItemByPk(newItem.colorID)
+    return res.formatter.created({ data: { ...newItem.dataValues, color: colorItem.dataValues } })
   } catch (error) {
     next(error)
   }

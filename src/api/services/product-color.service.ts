@@ -7,7 +7,9 @@ const NAMESPACE = 'services/product-color'
 
 export const createNewItem = async (item: ProductColor) => {
   try {
-    const newItem = await ProductColorSchema.create(item, { include: [{ model: ColorSchema, as: 'Color' }] })
+    const itemFound = await ProductColorSchema.findOne({ where: { productID: item.productID } })
+    if (itemFound) throw new Error(`Data already exist!`)
+    const newItem = await ProductColorSchema.create(item)
     return newItem
   } catch (error: any) {
     throw new Error(`Error creating item: ${error.message}`)
@@ -17,7 +19,7 @@ export const createNewItem = async (item: ProductColor) => {
 // Get by id
 export const getItemByPk = async (id: number) => {
   try {
-    const itemFound = await ProductColorSchema.findByPk(id, { include: [{ model: ColorSchema, as: 'Color' }] })
+    const itemFound = await ProductColorSchema.findByPk(id, { include: [{ model: ColorSchema, as: 'color' }] })
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
@@ -29,7 +31,7 @@ export const getItemByProductID = async (productID: number) => {
   try {
     const itemFound = await ProductColorSchema.findOne({
       where: { productID },
-      include: [{ model: ColorSchema, as: 'Color' }]
+      include: [{ model: ColorSchema, as: 'color' }]
     })
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
@@ -71,7 +73,7 @@ export const updateItemByProductID = async (productID: number, itemToUpdate: Pro
   try {
     const itemFound = await ProductColorSchema.findOne({
       where: { productID },
-      include: [{ model: ColorSchema, as: 'Color' }]
+      include: [{ model: ColorSchema, as: 'color' }]
     })
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.update(itemToUpdate)
@@ -85,7 +87,7 @@ export const updateItems = async (itemsUpdate: ProductColor[]) => {
   try {
     const updatedItems = await Promise.all(
       itemsUpdate.map(async (item) => {
-        const user = await ProductColorSchema.findByPk(item.id, { include: [{ model: ColorSchema, as: 'Color' }] })
+        const user = await ProductColorSchema.findByPk(item.id, { include: [{ model: ColorSchema, as: 'color' }] })
         if (!user) {
           throw new Error(`Item with id ${item.id} not found`)
         }

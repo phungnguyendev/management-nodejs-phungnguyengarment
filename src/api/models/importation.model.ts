@@ -31,7 +31,7 @@ export default class ImportationSchema extends Model<Importation> {
   @Column({ type: FLOAT, field: 'quantity' })
   declare quantity: number
 
-  @Column({ type: DATE, field: 'date_imported' })
+  @Column({ type: STRING, field: 'date_imported' })
   declare dateImported: string
 
   @BelongsTo(() => ProductSchema)

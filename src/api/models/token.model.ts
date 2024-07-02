@@ -26,7 +26,7 @@ export default class TokenSchema extends Model<Token> {
   @Column({ type: STRING, field: 'refresh_token' })
   declare refreshToken: string
 
-  @Column({ type: DATE, field: 'expires_at' })
+  @Column({ type: STRING, field: 'expires_at' })
   declare expiresAt: Date
 
   @BelongsTo(() => UserSchema)

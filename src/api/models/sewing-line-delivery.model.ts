@@ -38,7 +38,7 @@ export default class SewingLineDeliverySchema extends Model<SewingLineDelivery> 
   @Column({ type: FLOAT, field: 'quantity_sewed' })
   declare quantitySewed: number
 
-  @Column({ type: DATE, field: 'expired_date' })
+  @Column({ type: STRING, field: 'expired_date' })
   declare expiredDate: string
 
   @Column({ type: STRING, field: 'status' })

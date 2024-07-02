@@ -7,6 +7,8 @@ const NAMESPACE = 'services/printable-place'
 
 export const createNewItem = async (item: PrintablePlace) => {
   try {
+    const itemFound = await PrintablePlaceSchema.findOne({ where: { productID: item.productID } })
+    if (itemFound) throw new Error(`Data already exist!`)
     const newItem = await PrintablePlaceSchema.create(item)
     return newItem
   } catch (error: any) {
@@ -17,7 +19,7 @@ export const createNewItem = async (item: PrintablePlace) => {
 // Get by id
 export const getItemByPk = async (id: number) => {
   try {
-    const itemFound = await PrintablePlaceSchema.findByPk(id)
+    const itemFound = await PrintablePlaceSchema.findByPk(id, { include: [{ model: PrintSchema, as: 'print' }] })
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
@@ -27,7 +29,10 @@ export const getItemByPk = async (id: number) => {
 
 export const getItemByProductID = async (productID: number) => {
   try {
-    const itemFound = await PrintablePlaceSchema.findOne({ where: { productID } })
+    const itemFound = await PrintablePlaceSchema.findOne({
+      where: { productID },
+      include: [{ model: PrintSchema, as: 'print' }]
+    })
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
