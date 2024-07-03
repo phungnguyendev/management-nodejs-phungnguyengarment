@@ -1,6 +1,6 @@
 import { dynamicQuery } from '~/helpers/query'
 import UserRoleSchema, { UserRole } from '~/models/user-role.model'
-import { RequestBodyType } from '~/type'
+import { ErrorType, RequestBodyType } from '~/type'
 import RoleSchema from '../models/role.model'
 import UserSchema from '../models/user.model'
 
@@ -17,31 +17,46 @@ export const createNewItem = async (item: UserRole) => {
         })
       }
     }
-    return itemCreated
+    const itemFound = await UserRoleSchema.findByPk(itemCreated.id, {
+      include: [{ model: RoleSchema, as: 'role' }]
+    })
+    return itemFound
   } catch (error: any) {
-    throw new Error(`Error creating item: ${error.message}`)
+    throw {
+      error: 'Error create item',
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
 // Get by id
 export const getItemByPk = async (id: number) => {
   try {
-    const itemFound = await UserRoleSchema.findByPk(id)
+    const itemFound = await UserRoleSchema.findByPk(id, { include: [{ model: RoleSchema, as: 'role' }] })
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
-    throw new Error(`Error getting item: ${error.message}`)
+    throw {
+      error: 'Error get item',
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
 // Get by id
 export const getItemByUserID = async (userID: number) => {
   try {
-    const itemsFound = await UserRoleSchema.findAll({ where: { userID } })
+    const itemsFound = await UserRoleSchema.findAll({
+      where: { userID },
+      include: [{ model: RoleSchema, as: 'role' }]
+    })
     if (!itemsFound) throw new Error(`Item not found`)
     return itemsFound
   } catch (error: any) {
-    throw new Error(`Error getting item: ${error.message}`)
+    throw {
+      error: 'Error get item by',
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -57,7 +72,10 @@ export const getItems = async (body: RequestBodyType) => {
     })
     return items
   } catch (error: any) {
-    throw `Error getting list: ${error.message}`
+    throw {
+      error: 'Error get list',
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -67,9 +85,13 @@ export const updateItemByPk = async (id: number, itemToUpdate: UserRole) => {
     const itemFound = await UserRoleSchema.findByPk(id)
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.update(itemToUpdate)
-    return itemToUpdate
+    const itemUpdated = await UserRoleSchema.findByPk(itemFound.id, { include: [{ model: RoleSchema, as: 'role' }] })
+    return itemUpdated
   } catch (error: any) {
-    throw new Error(`Error updating item: ${error.message}`)
+    throw {
+      error: 'Error update item',
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -78,9 +100,13 @@ export const updateItemByUserID = async (userID: number, itemToUpdate: UserRole)
     const itemFound = await UserRoleSchema.findOne({ where: { userID } })
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.update(itemToUpdate)
-    return itemToUpdate
+    const itemUpdated = await UserRoleSchema.findByPk(itemFound.id, { include: [{ model: RoleSchema, as: 'role' }] })
+    return itemUpdated
   } catch (error: any) {
-    throw new Error(`Error updating item: ${error.message}`)
+    throw {
+      error: 'Error update item by',
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -131,7 +157,10 @@ export const updateItemsBy = async (query: { field: string; id: number }, record
     const updatedList = [...existingRecords.filter((record) => !recordsToDelete.includes(record)), ...itemsCreated]
     return updatedList
   } catch (error: any) {
-    throw `Error updating multiple item: ${error.message}`
+    throw {
+      error: 'Error update multiple item',
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -143,7 +172,10 @@ export const deleteItemByPk = async (id: number) => {
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw new Error(`Error deleting item: ${error.message}`)
+    throw {
+      error: 'Error delete item',
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -155,6 +187,9 @@ export const deleteItemByUserID = async (userID: number) => {
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw new Error(`Error deleting item: ${error.message}`)
+    throw {
+      error: 'Error delete item by',
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }

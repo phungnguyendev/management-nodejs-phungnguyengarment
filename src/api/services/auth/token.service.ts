@@ -1,6 +1,8 @@
 import { Op } from 'sequelize'
-import { generateToken, verifyToken } from '~/api/helpers/jsonwebtoken.helper'
+import { dateFormatterToString, expiresDateFormJWTConfig } from '~/api/helpers/date.helper'
+import { decodeToken, generateToken, jwtConfig, verifyToken } from '~/api/helpers/jsonwebtoken.helper'
 import TokenSchema from '~/models/token.model'
+import { ErrorType } from '~/type'
 
 const NAMESPACE = 'services/token'
 
@@ -11,29 +13,34 @@ export const getToken = async (userID: number): Promise<TokenSchema> => {
     if (!tokenFound) throw new Error(`Token not found`)
     return tokenFound
   } catch (error: any) {
-    throw new Error(`Error getting token: ${error.message}`)
+    throw {
+      error: `Error get token`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
 // Tạo AccessToken, RefreshToken và lưu trữ
 export const generateAndSaveTokens = async (userID: number) => {
   try {
-    const accessToken = generateToken({ userID }, 'access_token')
-    const refreshToken = generateToken({ userID }, 'refresh_token')
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7Days
-    // const expiresAt = dateNow() // 7Days
     const tokenFound = await TokenSchema.findOne({
       where: {
         userID
       }
     })
-    if (tokenFound) {
-      await tokenFound.destroy()
-    }
-    await TokenSchema.create({ userID, refreshToken, expiresAt })
+    if (tokenFound) await tokenFound.destroy()
+
+    const accessToken = generateToken({ userID }, 'access_token')
+    const refreshToken = generateToken({ userID }, 'refresh_token')
+    // const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7Days
+    const expiresAt = expiresDateFormJWTConfig(jwtConfig.accessToken) // 7Days
+    await TokenSchema.create({ userID, refreshToken, expiresAt: dateFormatterToString(expiresAt, 'iso8601') })
     return { accessToken, refreshToken }
   } catch (error: any) {
-    throw new Error(`Error refresh accessToken: ${error.message}`)
+    throw {
+      error: `Error generate and save token`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -55,16 +62,18 @@ export const refreshAccessToken = async (refreshToken: string): Promise<string> 
     if (!storedToken) throw new Error(`Refresh token not found or expired!`)
     return generateToken({ userID: payload.userID }, 'access_token')
   } catch (error: any) {
-    throw new Error(`Error refresh accessToken: ${error.message}`)
+    throw {
+      error: `Error refresh accessToken`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
 // Xóa RefreshToken
 export const revokeRefreshToken = async (refreshToken: string) => {
   try {
-    const verify = verifyToken(refreshToken, 'refresh_token')
-    if (!verify) throw new Error(`Invalid refresh token!`)
-    const payload = verify as { userID: number }
+    const decoded = decodeToken(refreshToken)
+    const payload = decoded as { userID: number }
     const storedToken = await TokenSchema.findOne({
       where: {
         userID: payload.userID
@@ -72,8 +81,11 @@ export const revokeRefreshToken = async (refreshToken: string) => {
     })
     if (!storedToken) throw new Error(`Token not found!`)
     await storedToken.destroy()
-    return { message: 'Success!' }
+    return { message: `Logout successfully!` }
   } catch (error: any) {
-    throw new Error(`Error revoke refreshToken: ${error.message}`)
+    throw {
+      error: `Error revoke refreshToken`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }

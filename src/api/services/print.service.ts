@@ -1,15 +1,20 @@
 import { getItemsQuery } from '~/helpers/query'
 import PrintSchema, { Print } from '~/models/print.model'
-import { RequestBodyType } from '~/type'
+import { ErrorType, RequestBodyType } from '~/type'
 
 const NAMESPACE = 'services/print'
 
 export const createNewItem = async (item: Print) => {
   try {
+    const itemFound = await PrintSchema.findOne({ where: { name: item.name } })
+    if (itemFound) throw new Error(`Data already exist!`)
     const newItem = await PrintSchema.create(item)
     return newItem
   } catch (error: any) {
-    throw new Error(`Error creating item: ${error.message}`)
+    throw {
+      error: `Error create item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -20,7 +25,10 @@ export const getItemByPk = async (id: number) => {
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
-    throw new Error(`Error getting item: ${error.message}`)
+    throw {
+      error: `Error get item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -30,7 +38,10 @@ export const getItems = async (body: RequestBodyType) => {
     const items = await PrintSchema.findAndCountAll(getItemsQuery(body))
     return items
   } catch (error: any) {
-    throw `Error getting list: ${error.message}`
+    throw {
+      error: `Error get list`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -42,7 +53,10 @@ export const updateItemByPk = async (id: number, itemToUpdate: Print) => {
     await itemFound.update(itemToUpdate)
     return itemToUpdate
   } catch (error: any) {
-    throw new Error(`Error updating item: ${error.message}`)
+    throw {
+      error: `Error update item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -60,7 +74,10 @@ export const updateItems = async (itemsUpdate: Print[]) => {
     )
     return updatedItems
   } catch (error: any) {
-    throw `Error updating multiple item: ${error.message}`
+    throw {
+      error: `Error update multiple item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -72,6 +89,9 @@ export const deleteItemByPk = async (id: number) => {
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw new Error(`Error deleting item: ${error.message}`)
+    throw {
+      error: `Error delete item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }

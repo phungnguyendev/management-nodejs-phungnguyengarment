@@ -14,8 +14,8 @@ export const createNewItem = async (req: Request, res: Response, next: NextFunct
     const newItem = await service.createNewItem(dataRequest)
     const printFound = await service.getItemByPk(newItem.printID)
     return res.formatter.created({ data: { ...newItem.dataValues, print: printFound.dataValues } })
-  } catch (error) {
-    next(error)
+  } catch (error: any) {
+    return res.formatter.badRequest({ error })
   }
 }
 
@@ -24,8 +24,8 @@ export const getItemByPk = async (req: Request, res: Response, next: NextFunctio
     const id = Number(req.params.id)
     const itemFound = await service.getItemByPk(id)
     return res.formatter.ok({ data: itemFound })
-  } catch (error) {
-    next(error)
+  } catch (error: any) {
+    return res.formatter.badRequest({ error })
   }
 }
 
@@ -34,8 +34,8 @@ export const getItemByProductID = async (req: Request, res: Response, next: Next
     const productID = Number(req.params.productID)
     const itemFound = await service.getItemByProductID(productID)
     return res.formatter.ok({ data: itemFound })
-  } catch (error) {
-    next(error)
+  } catch (error: any) {
+    return res.formatter.badRequest({ error })
   }
 }
 
@@ -53,8 +53,8 @@ export const getItems = async (req: Request, res: Response, next: NextFunction) 
       pageSize: Number(bodyRequest.paginator.pageSize),
       total: bodyRequest.search.term.length > 0 ? items.count : countAll.count
     })
-  } catch (error) {
-    next(error)
+  } catch (error: any) {
+    return res.formatter.badRequest({ error })
   }
 }
 
@@ -66,8 +66,8 @@ export const updateItemByPk = async (req: Request, res: Response, next: NextFunc
     }
     const itemUpdated = await service.updateItemByPk(id, itemRequest)
     return res.formatter.ok({ data: itemUpdated })
-  } catch (error) {
-    next(error)
+  } catch (error: any) {
+    return res.formatter.badRequest({ error })
   }
 }
 
@@ -79,8 +79,8 @@ export const updateItemByProductID = async (req: Request, res: Response, next: N
     }
     const itemUpdated = await service.updateItemByProductID(productID, itemRequest)
     return res.formatter.ok({ data: itemUpdated })
-  } catch (error) {
-    next(error)
+  } catch (error: any) {
+    return res.formatter.badRequest({ error })
   }
 }
 export const deleteItemByPk = async (req: Request, res: Response, next: NextFunction) => {
@@ -88,8 +88,8 @@ export const deleteItemByPk = async (req: Request, res: Response, next: NextFunc
     const id = Number(req.params.id)
     const destroyed = await service.deleteItemByPk(id)
     return res.formatter.ok({ message: destroyed.message })
-  } catch (error) {
-    next(error)
+  } catch (error: any) {
+    return res.formatter.badRequest({ error })
   }
 }
 
@@ -98,7 +98,7 @@ export const deleteItemByProductID = async (req: Request, res: Response, next: N
     const productID = Number(req.params.productID)
     await service.deleteItemByProductID(productID)
     return res.formatter.ok({})
-  } catch (error) {
-    next(error)
+  } catch (error: any) {
+    return res.formatter.badRequest({ error })
   }
 }

@@ -1,10 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
-import jwt from 'jsonwebtoken'
-import appConfig from '~/config/app.config'
 import * as authService from '~/services/auth/auth.service'
 import * as tokenService from '~/services/auth/token.service'
-import * as userRoleService from '~/services/user-role.service'
-import * as userService from '~/services/user.service'
 
 const PATH = 'Auth'
 const NAMESPACE = 'controllers/auth'
@@ -14,31 +10,36 @@ export const login = async (req: Request, res: Response) => {
     const result = await authService.login(req.body.email.toLowerCase(), req.body.password)
     return res.formatter.ok({ data: result })
   } catch (error: any) {
-    return res.formatter.badRequest({ message: `${error.message}` })
+    return res.formatter.badRequest({ error })
+  }
+}
+
+export const refreshAccessToken = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { refreshToken } = req.body
+    if (!refreshToken) return res.formatter.badRequest({ message: 'Refresh token is required' })
+
+    const newAccessToken = await tokenService.refreshAccessToken(refreshToken)
+    return res.formatter.ok({ data: { accessToken: newAccessToken } })
+  } catch (error: any) {
+    return res.formatter.badRequest({ error })
   }
 }
 
 export const getUserInfoFromAccessToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const authToken = req.headers['authorization']
-    if (!authToken) throw new Error(`Token not found!`)
-    const [Bearer, token] = authToken.split(' ')
-    if (Bearer !== 'Bearer') throw new Error('Invalid token format!')
-    jwt.verify(token, appConfig.secret.accessKey, async (err, payload: any) => {
-      if (err?.message === 'jwt expired')
-        return res.formatter.badRequest({ message: 'Login session has expired, please log in again!' })
-      if (err) return res.formatter.forbidden({})
-      const userFound = await userService.getItemByPk(payload.userID)
-      const userRolesFound = await userRoleService.getItemByUserID(payload.userID)
-      return res.formatter.ok({
-        data: {
-          user: userFound,
-          userRoles: userRolesFound
+    if (!authToken)
+      return res.formatter.notFound({
+        error: {
+          error: 'Error get user from accessToken',
+          errorDetail: 'Token not found!'
         }
       })
-    })
+    const result = await authService.getUserInfoFromAccessToken(authToken)
+    return res.formatter.ok({ data: result })
   } catch (error: any) {
-    next(error)
+    return res.formatter.badRequest({ error })
   }
 }
 
@@ -47,8 +48,8 @@ export const verifyEmailAndSendOTP = async (req: Request, res: Response) => {
     const email = String(req.params.email)
     const result = await authService.verifyEmailAndSendOTP(email)
     return res.formatter.ok({ data: result })
-  } catch (err: any) {
-    return res.formatter.badRequest({ message: `${err.message}` })
+  } catch (error: any) {
+    return res.formatter.badRequest({ error })
   }
 }
 
@@ -58,8 +59,19 @@ export const verifyOTPCode = async (req: Request, res: Response) => {
     const otp = String(req.body.otp)
     const verified = await authService.verifyOTPCode(email, otp)
     return res.formatter.ok({ data: verified, message: 'User authenticated successfully!' })
-  } catch (err: any) {
-    return res.formatter.badRequest({ message: `${err.message}` })
+  } catch (error: any) {
+    return res.formatter.badRequest({ error })
+  }
+}
+
+export const resetPasswordWithAccesskey = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.params
+    const { accessKey, newPassword } = req.body
+    const userUpdated = await authService.resetPasswordWithAccesskey(email, newPassword, accessKey)
+    return res.formatter.ok({ data: userUpdated })
+  } catch (error: any) {
+    return res.formatter.badRequest({ error })
   }
 }
 
@@ -67,9 +79,9 @@ export const logout = async (req: Request, res: Response) => {
   try {
     const { refreshToken } = req.body
     if (!refreshToken) throw new Error('Refresh token is required!')
-    await tokenService.revokeRefreshToken(refreshToken)
-    return res.formatter.ok({ message: 'User logged out successfully!' })
-  } catch (err: any) {
-    return res.formatter.badRequest({ message: `${err.message}` })
+    const result = await tokenService.revokeRefreshToken(refreshToken)
+    return res.formatter.ok({ message: result.message })
+  } catch (error: any) {
+    return res.formatter.badRequest({ error })
   }
 }

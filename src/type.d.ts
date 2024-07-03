@@ -32,3 +32,8 @@ export type RequestBodyType = {
     direction: 'asc' | 'desc' // direction: asc|desc sắp xếp trước sau
   }
 }
+
+export type ErrorType = {
+  error: string
+  errorDetail: string
+}

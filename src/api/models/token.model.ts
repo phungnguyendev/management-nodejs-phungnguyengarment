@@ -7,7 +7,7 @@ export interface Token {
   id?: number
   userID?: number | null
   refreshToken?: string | null
-  expiresAt?: Date
+  expiresAt?: string
 }
 
 @Table({
@@ -27,7 +27,7 @@ export default class TokenSchema extends Model<Token> {
   declare refreshToken: string
 
   @Column({ type: STRING, field: 'expires_at' })
-  declare expiresAt: Date
+  declare expiresAt: string
 
   @BelongsTo(() => UserSchema)
   declare user: UserSchema

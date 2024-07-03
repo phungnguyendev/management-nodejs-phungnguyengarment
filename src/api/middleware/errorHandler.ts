@@ -6,18 +6,38 @@ const errorHandler = (err: EagerLoadingError, req: Request, res: Response, next:
   console.error(err.stack)
 
   if (err.message && err.message.includes('Validation error')) {
-    return res.formatter.badRequest({ message: 'Validation error!', detailError: err.message })
+    return res.formatter.badRequest({
+      error: {
+        error: 'Validation error!',
+        errorDetail: err.message
+      }
+    })
   }
 
   if (err.message && err.message.includes('Unique constraint error')) {
-    return res.formatter.badRequest({ message: 'Unique constraint error!', detailError: err.message })
+    return res.formatter.badRequest({
+      error: {
+        error: 'Unique constraint error!',
+        errorDetail: err.message
+      }
+    })
   }
 
   if (err.message && err.message.includes('User not found')) {
-    return res.formatter.notFound({ message: 'User not found!', detailError: err.message })
+    return res.formatter.notFound({
+      error: {
+        error: 'User not found!',
+        errorDetail: err.message
+      }
+    })
   }
 
-  return res.formatter.serverError({ message: 'Internal server error!', detailError: err.message })
+  return res.formatter.serverError({
+    error: {
+      error: 'Internal server error!',
+      errorDetail: err.message
+    }
+  })
 }
 
 export default errorHandler

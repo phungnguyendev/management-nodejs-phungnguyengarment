@@ -1,11 +1,12 @@
 /* eslint-disable no-unused-vars */
 import { NextFunction, Request, Response } from 'express'
+import { ErrorType } from '~/type'
 import methods, { Method, MethodType } from './methods'
 
 export interface ResponseStory {
   success?: boolean | null
   message?: string | null
-  detailError?: string | null
+  error?: ErrorType | null
   data?: any
   meta?: any
   length?: number | null
@@ -47,7 +48,7 @@ const _generateFormatters = (res: Response) => {
       return res.status(method.status).json({
         success: statusSuccess,
         message: response.message ? response.message : method.message,
-        detailError: response.detailError,
+        error: response.error,
         data: response.data,
         meta: response.meta,
         length: response.length,

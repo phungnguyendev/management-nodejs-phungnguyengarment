@@ -13,8 +13,8 @@ export const createNewItem = async (req: Request, res: Response, next: NextFunct
     }
     const newItem = await service.createNewItem(dataRequest)
     return res.formatter.created({ data: newItem })
-  } catch (error) {
-    next(error)
+  } catch (error: any) {
+    return res.formatter.badRequest({ error })
   }
 }
 
@@ -23,8 +23,8 @@ export const getItemByPk = async (req: Request, res: Response, next: NextFunctio
     const id = Number(req.params.id)
     const itemFound = await service.getItemByPk(id)
     return res.formatter.ok({ data: itemFound })
-  } catch (error) {
-    next(error)
+  } catch (error: any) {
+    return res.formatter.badRequest({ error })
   }
 }
 
@@ -33,8 +33,8 @@ export const getItemByProductCode = async (req: Request, res: Response, next: Ne
     const productCode = String(req.params.productCode)
     const itemFound = await service.getItemByProductCode(productCode)
     return res.formatter.ok({ data: itemFound })
-  } catch (error) {
-    next(error)
+  } catch (error: any) {
+    return res.formatter.badRequest({ error })
   }
 }
 
@@ -52,8 +52,8 @@ export const getItems = async (req: Request, res: Response, next: NextFunction) 
       pageSize: Number(bodyRequest.paginator.pageSize),
       total: bodyRequest.search.term.length > 0 ? items.count : countAll.count
     })
-  } catch (error) {
-    next(error)
+  } catch (error: any) {
+    return res.formatter.badRequest({ error })
   }
 }
 
@@ -65,8 +65,8 @@ export const updateItemByPk = async (req: Request, res: Response, next: NextFunc
     }
     const itemUpdated = await service.updateItemByPk(id, itemRequest)
     return res.formatter.ok({ data: itemUpdated })
-  } catch (error) {
-    next(error)
+  } catch (error: any) {
+    return res.formatter.badRequest({ error })
   }
 }
 
@@ -75,7 +75,7 @@ export const deleteItemByPk = async (req: Request, res: Response, next: NextFunc
     const id = Number(req.params.id)
     const destroyed = await service.deleteItemByPk(id)
     return res.formatter.ok({ message: destroyed.message })
-  } catch (error) {
-    next(error)
+  } catch (error: any) {
+    return res.formatter.badRequest({ error })
   }
 }

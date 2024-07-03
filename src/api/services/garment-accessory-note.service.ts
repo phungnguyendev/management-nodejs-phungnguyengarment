@@ -1,6 +1,6 @@
 import { dynamicQuery } from '~/helpers/query'
 import GarmentAccessoryNoteSchema, { GarmentAccessoryNote } from '~/models/garment-accessory-note.model'
-import { RequestBodyType } from '~/type'
+import { ErrorType, RequestBodyType } from '~/type'
 import GarmentAccessorySchema from '../models/garment-accessory.model'
 import logging from '../utils/logging'
 
@@ -11,7 +11,10 @@ export const createNewItem = async (item: GarmentAccessoryNote) => {
     const newItem = await GarmentAccessoryNoteSchema.create(item)
     return newItem
   } catch (error: any) {
-    throw new Error(`Error creating item: ${error.message}`)
+    throw {
+      error: `Error create item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -22,7 +25,10 @@ export const getItemByPk = async (id: number) => {
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
-    throw new Error(`Error getting item: ${error.message}`)
+    throw {
+      error: `Error get item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -32,7 +38,10 @@ export const getItemByProductID = async (productID: number) => {
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
-    throw new Error(`Error getting item: ${error.message}`)
+    throw {
+      error: `Error get item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -48,7 +57,10 @@ export const getItems = async (body: RequestBodyType) => {
     })
     return items
   } catch (error: any) {
-    throw `Error getting list: ${error.message}`
+    throw {
+      error: `Error get list`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -60,7 +72,10 @@ export const updateItemByPk = async (id: number, itemToUpdate: GarmentAccessoryN
     await itemFound.update(itemToUpdate)
     return itemToUpdate
   } catch (error: any) {
-    throw new Error(`Error updating item: ${error.message}`)
+    throw {
+      error: `Error update item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -71,7 +86,10 @@ export const updateItemByProductID = async (productID: number, itemToUpdate: Gar
     await itemFound.update(itemToUpdate)
     return itemToUpdate
   } catch (error: any) {
-    throw new Error(`Error updating item: ${error.message}`)
+    throw {
+      error: `Error update item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -113,7 +131,10 @@ export const updateItemsBy = async (
     return updatedList
   } catch (error: any) {
     logging.error(NAMESPACE, `${error.message}`)
-    throw `Error updating multiple item: ${error.message}`
+    throw {
+      error: `Error update multiple item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -125,7 +146,10 @@ export const deleteItemByPk = async (id: number) => {
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw new Error(`Error deleting item: ${error.message}`)
+    throw {
+      error: `Error delete item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -136,6 +160,9 @@ export const deleteItemByProductID = async (productID: number) => {
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw new Error(`Error deleting item: ${error.message}`)
+    throw {
+      error: `Error delete item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }

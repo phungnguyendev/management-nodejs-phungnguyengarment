@@ -20,6 +20,12 @@ router.get(
 )
 
 router.post(
+  '/refresh-token',
+  validationRules([{ field: 'refreshToken', type: 'string', location: 'body' }]),
+  controller.refreshAccessToken
+)
+
+router.post(
   '/verify-email/:email',
   validationRules([{ field: 'email', type: 'string', location: 'params' }]),
   controller.verifyEmailAndSendOTP
@@ -32,6 +38,16 @@ router.post(
     { field: 'otp', type: 'string', location: 'body' }
   ]),
   controller.verifyOTPCode
+)
+
+router.post(
+  '/reset-password/:email',
+  validationRules([
+    { field: 'email', type: 'string', location: 'params' },
+    { field: 'newPassword', type: 'string', location: 'body' },
+    { field: 'accessKey', type: 'string', location: 'body' }
+  ]),
+  controller.resetPasswordWithAccesskey
 )
 
 router.post(

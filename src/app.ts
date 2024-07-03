@@ -18,8 +18,8 @@ const corsOptions: CorsOptions = {
   ]
 }
 // Accept json body request
-app.use(express.json({ limit: '50mb' }))
-app.use(express.urlencoded({ extended: true, limit: '50mb' }))
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 // (helmet) helps secure Express apps by setting HTTP response headers.
 app.use(morgan('dev'))
 app.use(helmet())

@@ -1,6 +1,6 @@
 import { dynamicQuery } from '~/helpers/query'
 import ProductGroupSchema, { ProductGroup } from '~/models/product-group.model'
-import { RequestBodyType } from '~/type'
+import { ErrorType, RequestBodyType } from '~/type'
 import GroupSchema from '../models/group.model'
 
 const NAMESPACE = 'services/product-group'
@@ -12,7 +12,10 @@ export const createNewItem = async (item: ProductGroup) => {
     const newItem = await ProductGroupSchema.create(item)
     return newItem
   } catch (error: any) {
-    throw new Error(`Error creating item: ${error.message}`)
+    throw {
+      error: `Error create item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -23,7 +26,10 @@ export const getItemByPk = async (id: number) => {
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
-    throw new Error(`Error getting item: ${error.message}`)
+    throw {
+      error: `Error get item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -36,7 +42,10 @@ export const getItemByProductID = async (productID: number) => {
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
-    throw new Error(`Error getting item: ${error.message}`)
+    throw {
+      error: `Error get item by`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -52,7 +61,12 @@ export const getItems = async (body: RequestBodyType) => {
     })
     return items
   } catch (error: any) {
-    throw `Error getting list: ${error.message}`
+    {
+      throw {
+        error: `Error get list`,
+        errorDetail: `${error.message}`
+      } as ErrorType
+    }
   }
 }
 
@@ -64,7 +78,10 @@ export const updateItemByPk = async (id: number, itemToUpdate: ProductGroup) => 
     await itemFound.update(itemToUpdate)
     return itemToUpdate
   } catch (error: any) {
-    throw new Error(`Error updating item: ${error.message}`)
+    throw {
+      error: `Error update item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -76,7 +93,10 @@ export const updateItemByProductID = async (productID: number, itemToUpdate: Pro
     await itemFound.update(itemToUpdate)
     return itemToUpdate
   } catch (error: any) {
-    throw new Error(`Error updating item: ${error.message}`)
+    throw {
+      error: `Error update item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -94,7 +114,10 @@ export const updateItems = async (itemsUpdate: ProductGroup[]) => {
     )
     return updatedItems
   } catch (error: any) {
-    throw `Error updating multiple item: ${error.message}`
+    throw {
+      error: `Error update multiple item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -106,7 +129,10 @@ export const deleteItemByPk = async (id: number) => {
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw new Error(`Error deleting item: ${error.message}`)
+    throw {
+      error: `Error delete item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -117,6 +143,9 @@ export const deleteItemByProductID = async (productID: number) => {
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw new Error(`Error deleting item: ${error.message}`)
+    throw {
+      error: `Error delete item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }

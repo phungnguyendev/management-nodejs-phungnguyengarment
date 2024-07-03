@@ -12,6 +12,7 @@ export interface User {
   phone?: string | null
   otp?: string | null | null
   isAdmin?: boolean | null
+  accessKey?: string | null
   workDescription?: string | null
   birthday?: string | null
   status?: ItemStatusType
@@ -46,6 +47,9 @@ export default class UserSchema extends Model<User> {
 
   @Column({ type: BOOLEAN, field: 'is_admin' })
   declare isAdmin: boolean
+
+  @Column({ type: STRING(45), field: 'access_key' })
+  declare accessKey: string
 
   @Column({ type: STRING, field: 'work_description' })
   declare workDescription: string

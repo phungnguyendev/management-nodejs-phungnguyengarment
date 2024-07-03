@@ -1,5 +1,4 @@
 import { Router } from 'express'
-import { authentication } from '~/middleware/auth.middleware'
 import accessoryNoteRoute from '~/routes/accessory-note.route'
 import authRoute from '~/routes/auth/auth.route'
 import colorRoute from '~/routes/color.route'
@@ -24,7 +23,7 @@ import userRoute from '~/routes/user.route'
 const router = Router()
 
 router.use('/auth', authRoute)
-router.use('/users', authentication, userRoute)
+router.use('/users', userRoute)
 router.use('/roles', roleRoute)
 router.use('/user-roles', userRoleRoute)
 router.use('/colors', colorRoute)

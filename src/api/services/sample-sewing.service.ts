@@ -1,6 +1,6 @@
 import { getItemsQuery } from '~/helpers/query'
 import SampleSewingSchema, { SampleSewing } from '~/models/sample-sewing.model'
-import { RequestBodyType } from '~/type'
+import { ErrorType, RequestBodyType } from '~/type'
 
 const NAMESPACE = 'services/sample-sewing'
 
@@ -11,7 +11,10 @@ export const createNewItem = async (item: SampleSewing) => {
     const newItem = await SampleSewingSchema.create(item)
     return newItem
   } catch (error: any) {
-    throw new Error(`Error creating item: ${error.message}`)
+    throw {
+      error: `Error create item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -22,7 +25,10 @@ export const getItemByPk = async (id: number) => {
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
-    throw new Error(`Error getting item: ${error.message}`)
+    throw {
+      error: `Error get item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -33,7 +39,10 @@ export const getItemByProductID = async (productID: number) => {
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
-    throw new Error(`Error getting item: ${error.message}`)
+    throw {
+      error: `Error get item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -43,7 +52,10 @@ export const getItems = async (body: RequestBodyType) => {
     const items = await SampleSewingSchema.findAndCountAll(getItemsQuery(body))
     return items
   } catch (error: any) {
-    throw `Error getting list: ${error.message}`
+    throw {
+      error: `Error get list`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -55,7 +67,10 @@ export const updateItemByPk = async (id: number, itemToUpdate: SampleSewing) => 
     await itemFound.update(itemToUpdate)
     return itemToUpdate
   } catch (error: any) {
-    throw new Error(`Error updating item: ${error.message}`)
+    throw {
+      error: `Error update item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -67,7 +82,10 @@ export const updateItemByProductID = async (productID: number, itemToUpdate: Sam
     await itemFound.update(itemToUpdate)
     return itemToUpdate
   } catch (error: any) {
-    throw new Error(`Error updating item: ${error.message}`)
+    throw {
+      error: `Error update item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -79,7 +97,10 @@ export const deleteItemByPk = async (id: number) => {
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw new Error(`Error deleting item: ${error.message}`)
+    throw {
+      error: `Error delete item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
 
@@ -90,6 +111,9 @@ export const deleteItemByProductID = async (productID: number) => {
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw new Error(`Error deleting item: ${error.message}`)
+    throw {
+      error: `Error delete item`,
+      errorDetail: `${error.message}`
+    } as ErrorType
   }
 }
