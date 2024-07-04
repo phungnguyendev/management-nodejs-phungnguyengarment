@@ -10,7 +10,10 @@ export const createNewItem = async (item: PrintablePlace) => {
     const itemFound = await PrintablePlaceSchema.findOne({ where: { productID: item.productID } })
     if (itemFound) throw new Error(`Data already exist!`)
     const newItem = await PrintablePlaceSchema.create(item)
-    return newItem
+    const itemCreated = await PrintablePlaceSchema.findByPk(newItem.id, {
+      include: [{ model: PrintSchema, as: 'print' }]
+    })
+    return itemCreated
   } catch (error: any) {
     throw {
       error: `Error create item`,
@@ -73,7 +76,8 @@ export const updateItemByPk = async (id: number, itemToUpdate: PrintablePlace) =
     const itemFound = await PrintablePlaceSchema.findByPk(id)
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.update(itemToUpdate)
-    return itemToUpdate
+    const itemUpdated = await PrintablePlaceSchema.findByPk(id, { include: [{ model: PrintSchema, as: 'print' }] })
+    return itemUpdated
   } catch (error: any) {
     throw {
       error: `Error update item`,
@@ -88,7 +92,11 @@ export const updateItemByProductID = async (productID: number, itemToUpdate: Pri
     const itemFound = await PrintablePlaceSchema.findOne({ where: { productID } })
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.update(itemToUpdate)
-    return itemToUpdate
+    const itemUpdated = await PrintablePlaceSchema.findOne({
+      where: { productID },
+      include: [{ model: PrintSchema, as: 'print' }]
+    })
+    return itemUpdated
   } catch (error: any) {
     throw {
       error: `Error update item`,
@@ -101,7 +109,7 @@ export const updateItems = async (itemsUpdate: PrintablePlace[]) => {
   try {
     const updatedItems = await Promise.all(
       itemsUpdate.map(async (item) => {
-        const user = await PrintablePlaceSchema.findByPk(item.id)
+        const user = await PrintablePlaceSchema.findByPk(item.id, { include: [{ model: PrintSchema, as: 'print' }] })
         if (!user) {
           throw new Error(`Item with id ${item.id} not found`)
         }

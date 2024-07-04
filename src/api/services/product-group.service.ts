@@ -10,7 +10,10 @@ export const createNewItem = async (item: ProductGroup) => {
     const itemFound = await ProductGroupSchema.findOne({ where: { productID: item.productID } })
     if (itemFound) throw new Error(`Data already exist!`)
     const newItem = await ProductGroupSchema.create(item)
-    return newItem
+    const itemCreated = await ProductGroupSchema.findByPk(newItem.id, {
+      include: [{ model: GroupSchema, as: 'group' }]
+    })
+    return itemCreated
   } catch (error: any) {
     throw {
       error: `Error create item`,
@@ -76,7 +79,8 @@ export const updateItemByPk = async (id: number, itemToUpdate: ProductGroup) => 
     const itemFound = await ProductGroupSchema.findByPk(id)
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.update(itemToUpdate)
-    return itemToUpdate
+    const itemUpdated = await ProductGroupSchema.findByPk(id, { include: [{ model: GroupSchema, as: 'group' }] })
+    return itemUpdated
   } catch (error: any) {
     throw {
       error: `Error update item`,
@@ -91,7 +95,11 @@ export const updateItemByProductID = async (productID: number, itemToUpdate: Pro
     const itemFound = await ProductGroupSchema.findOne({ where: { productID } })
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.update(itemToUpdate)
-    return itemToUpdate
+    const itemUpdated = await ProductGroupSchema.findOne({
+      where: { productID },
+      include: [{ model: GroupSchema, as: 'group' }]
+    })
+    return itemUpdated
   } catch (error: any) {
     throw {
       error: `Error update item`,
@@ -104,7 +112,7 @@ export const updateItems = async (itemsUpdate: ProductGroup[]) => {
   try {
     const updatedItems = await Promise.all(
       itemsUpdate.map(async (item) => {
-        const user = await ProductGroupSchema.findByPk(item.id)
+        const user = await ProductGroupSchema.findByPk(item.id, { include: [{ model: GroupSchema, as: 'group' }] })
         if (!user) {
           throw new Error(`Item with id ${item.id} not found`)
         }

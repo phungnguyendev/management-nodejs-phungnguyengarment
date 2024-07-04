@@ -12,8 +12,7 @@ export const createNewItem = async (req: Request, res: Response, next: NextFunct
       status: req.body.status ?? 'active'
     }
     const newItem = await service.createNewItem(dataRequest)
-    const printFound = await service.getItemByPk(newItem.printID)
-    return res.formatter.created({ data: { ...newItem.dataValues, print: printFound.dataValues } })
+    return res.formatter.created({ data: newItem })
   } catch (error: any) {
     return res.formatter.badRequest({ error })
   }

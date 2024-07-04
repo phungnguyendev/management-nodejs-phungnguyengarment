@@ -13,8 +13,7 @@ export const createNewItem = async (req: Request, res: Response, next: NextFunct
       status: req.body.status ?? 'active'
     }
     const newItem = await service.createNewItem(dataRequest)
-    const groupFound = await groupService.getItemByPk(newItem.groupID)
-    return res.formatter.created({ data: { ...newItem.dataValues, group: groupFound.dataValues } })
+    return res.formatter.created({ data: newItem })
   } catch (error: any) {
     return res.formatter.badRequest({ error })
   }

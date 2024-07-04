@@ -1,7 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import jwt from 'jsonwebtoken'
-import appConfig from '~/config/app.config'
-import { verifyTokenSync } from '../helpers/jsonwebtoken.helper'
+import { decodeToken } from '../helpers/jsonwebtoken.helper'
 import RoleSchema from '../models/role.model'
 import UserRoleSchema from '../models/user-role.model'
 
@@ -44,22 +42,13 @@ export const authenticationAdmin = async (req: Request, res: Response, next: Nex
     if (!authHeader) throw new Error()
     const [bearer, token] = authHeader.split(' ')
     if (bearer !== 'Bearer' || !token) throw new Error('Invalid token format')
-    jwt.verify(token, appConfig.secret.accessKey, async (err, payload: any) => {
-      if (err) {
-        return res.formatter.forbidden({
-          error: {
-            error: 'Authentication user',
-            errorDetail: 'User is not allowed!'
-          }
-        })
-      }
-      const adminRole = await RoleSchema.findOne({ where: { role: 'admin' } })
-      if (!adminRole) throw new Error('Can not find role admin!')
-      const userRoleAdmin = await UserRoleSchema.findOne({ where: { userID: payload.userID, roleID: adminRole.id } })
-      if (!userRoleAdmin) return res.formatter.unauthorized({ message: `User is not allowed!` })
-      res.locals.userID = payload.userID
-      next()
-    })
+    const decoded = decodeToken(token) as { userID: number }
+    const adminRole = await RoleSchema.findOne({ where: { role: 'admin' } })
+    if (!adminRole) throw new Error('Can not find role admin!')
+    const userRoleAdmin = await UserRoleSchema.findOne({ where: { userID: decoded.userID, roleID: adminRole.id } })
+    if (!userRoleAdmin) return res.formatter.unauthorized({ message: `User is not allowed!` })
+    res.locals.userID = decoded.userID
+    next()
   } catch (error: any) {
     return res.formatter.unauthorized({ message: `${error.message}` })
   }

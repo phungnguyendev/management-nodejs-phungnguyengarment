@@ -40,7 +40,7 @@ router.patch(
 router.delete('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.deleteItemByPk)
 
 router.delete(
-  'productID/:productID',
+  '/productID/:productID',
   validationRules([{ field: 'productID', type: 'int', location: 'params' }]),
   controller.deleteItemByProductID
 )
