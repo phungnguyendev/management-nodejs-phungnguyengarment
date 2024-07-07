@@ -79,7 +79,7 @@ export const updateItemByPk = async (id: number, itemToUpdate: GarmentAccessory)
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.update(itemToUpdate)
     const itemUpdated = await GarmentAccessorySchema.findByPk(id, {
-      include: [{ model: ProductSchema, as: 'product' }]
+      include: [{ model: ProductSchema, as  : 'product' }]
     })
     return itemUpdated
   } catch (error: any) {

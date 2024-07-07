@@ -114,11 +114,8 @@ export const updateItemsBy = async (query: { field: string; id: number }, record
   try {
     // return updatedItems
     const existingRecords = await UserRoleSchema.findAll({
-      where: { [query.field]: query.id },
-      include: [{ model: RoleSchema, as: 'role' }]
+      where: { [query.field]: query.id }
     })
-
-    const userFound = await UserSchema.findByPk(query.id)
 
     // Tìm các bản ghi cần xoá
     const recordsToDelete = existingRecords.filter(
@@ -141,9 +138,9 @@ export const updateItemsBy = async (query: { field: string; id: number }, record
     // Cập nhật lại thuộc tính isAdmin của user nếu tìm thấy role = "admin"
     const adminRoleFound = await RoleSchema.findOne({ where: { role: 'admin' } })
     if (adminRoleFound && recordsToUpdate.some((item) => item.roleID === adminRoleFound.id)) {
-      await userFound?.update({ isAdmin: true })
+      await UserSchema.update({ isAdmin: true }, { where: { id: query.id } })
     } else {
-      await userFound?.update({ isAdmin: false })
+      await UserSchema.update({ isAdmin: false }, { where: { id: query.id } })
     }
 
     // Thêm mới các bảng ghi mới
@@ -153,9 +150,18 @@ export const updateItemsBy = async (query: { field: string; id: number }, record
       })
     )
 
+    // Lấy lại danh sách user đầy đủ
+    const updatedUserRoles = await UserRoleSchema.findAll({
+      where: { userID: query.id },
+      include: [
+        { model: RoleSchema, as: 'role' },
+        { model: UserSchema, as: 'user' }
+      ]
+    })
+
     // Trả về danh sách cập nhật sau xử lý
-    const updatedList = [...existingRecords.filter((record) => !recordsToDelete.includes(record)), ...itemsCreated]
-    return updatedList
+    // const updatedList = [...existingRecords.filter((record) => !recordsToDelete.includes(record)), ...itemsCreated]
+    return updatedUserRoles
   } catch (error: any) {
     throw {
       error: 'Error update multiple item',
