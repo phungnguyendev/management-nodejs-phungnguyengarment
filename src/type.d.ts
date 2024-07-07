@@ -1,7 +1,5 @@
 export type ItemStatusType = 'active' | 'deleted' | 'pending'
 
-export type NoteItemStatusType = 'lake' | 'enough' | 'arrived' | 'not_arrived'
-
 export type UserRoleType =
   | 'admin'
   | 'product_manager'

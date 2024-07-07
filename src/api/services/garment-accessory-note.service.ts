@@ -1,6 +1,7 @@
 import { dynamicQuery } from '~/helpers/query'
 import GarmentAccessoryNoteSchema, { GarmentAccessoryNote } from '~/models/garment-accessory-note.model'
 import { ErrorType, RequestBodyType } from '~/type'
+import AccessoryNoteSchema from '../models/accessory-note.model'
 import GarmentAccessorySchema from '../models/garment-accessory.model'
 import logging from '../utils/logging'
 
@@ -8,8 +9,22 @@ const NAMESPACE = 'services/garment-accessory-note'
 
 export const createNewItem = async (item: GarmentAccessoryNote) => {
   try {
+    const itemFound = await GarmentAccessoryNoteSchema.findOne({
+      where: {
+        garmentAccessoryID: item.garmentAccessoryID,
+        accessoryNoteID: item.accessoryNoteID
+      }
+    })
+
+    if (itemFound) throw new Error(`Data already exist!`)
     const newItem = await GarmentAccessoryNoteSchema.create(item)
-    return newItem
+    const itemCreated = await GarmentAccessoryNoteSchema.findByPk(newItem.id, {
+      include: [
+        { model: GarmentAccessorySchema, as: 'garmentAccessory' },
+        { model: AccessoryNoteSchema, as: 'accessoryNote' }
+      ]
+    })
+    return itemCreated
   } catch (error: any) {
     throw {
       error: `Error create item`,
@@ -21,7 +36,12 @@ export const createNewItem = async (item: GarmentAccessoryNote) => {
 // Get by id
 export const getItemByPk = async (id: number) => {
   try {
-    const itemFound = await GarmentAccessoryNoteSchema.findByPk(id)
+    const itemFound = await GarmentAccessoryNoteSchema.findByPk(id, {
+      include: [
+        { model: GarmentAccessorySchema, as: 'garmentAccessory' },
+        { model: AccessoryNoteSchema, as: 'accessoryNote' }
+      ]
+    })
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
@@ -32,9 +52,15 @@ export const getItemByPk = async (id: number) => {
   }
 }
 
-export const getItemByProductID = async (productID: number) => {
+export const getItemByGarmentAccessoryID = async (garmentAccessoryID: number) => {
   try {
-    const itemFound = await GarmentAccessoryNoteSchema.findOne({ where: { productID } })
+    const itemFound = await GarmentAccessoryNoteSchema.findOne({
+      where: { garmentAccessoryID },
+      include: [
+        { model: GarmentAccessorySchema, as: 'garmentAccessory' },
+        { model: AccessoryNoteSchema, as: 'accessoryNote' }
+      ]
+    })
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
@@ -53,7 +79,10 @@ export const getItems = async (body: RequestBodyType) => {
       limit: body.paginator.pageSize === -1 ? undefined : body.paginator.pageSize,
       order: [[body.sorting.column, body.sorting.direction]],
       where: dynamicQuery<GarmentAccessoryNote>(body),
-      include: [{ model: GarmentAccessorySchema, as: 'garmentAccessory' }]
+      include: [
+        { model: GarmentAccessorySchema, as: 'garmentAccessory' },
+        { model: AccessoryNoteSchema, as: 'accessoryNote' }
+      ]
     })
     return items
   } catch (error: any) {
@@ -70,7 +99,13 @@ export const updateItemByPk = async (id: number, itemToUpdate: GarmentAccessoryN
     const itemFound = await GarmentAccessoryNoteSchema.findByPk(id)
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.update(itemToUpdate)
-    return itemToUpdate
+    const itemUpdated = await GarmentAccessoryNoteSchema.findByPk(itemFound.id, {
+      include: [
+        { model: GarmentAccessorySchema, as: 'garmentAccessory' },
+        { model: AccessoryNoteSchema, as: 'accessoryNote' }
+      ]
+    })
+    return itemUpdated
   } catch (error: any) {
     throw {
       error: `Error update item`,
@@ -79,12 +114,22 @@ export const updateItemByPk = async (id: number, itemToUpdate: GarmentAccessoryN
   }
 }
 
-export const updateItemByProductID = async (productID: number, itemToUpdate: GarmentAccessoryNote) => {
+export const updateItemByGarmentAccessoryID = async (
+  garmentAccessoryID: number,
+  itemToUpdate: GarmentAccessoryNote
+) => {
   try {
-    const itemFound = await GarmentAccessoryNoteSchema.findOne({ where: { productID } })
+    const itemFound = await GarmentAccessoryNoteSchema.findOne({ where: { garmentAccessoryID } })
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.update(itemToUpdate)
-    return itemToUpdate
+    const itemUpdated = await GarmentAccessoryNoteSchema.findOne({
+      where: { garmentAccessoryID },
+      include: [
+        { model: GarmentAccessorySchema, as: 'garmentAccessory' },
+        { model: AccessoryNoteSchema, as: 'accessoryNote' }
+      ]
+    })
+    return itemUpdated
   } catch (error: any) {
     throw {
       error: `Error update item`,
@@ -116,19 +161,38 @@ export const updateItemsBy = async (
         !existingRecords.some((existingRecord) => existingRecord.accessoryNoteID === updatedRecord.accessoryNoteID)
     )
 
-    // Xoá các bản ghi không còn trong danh sách
-    await GarmentAccessoryNoteSchema.destroy({
+    if (recordsToAdd.length > 0) {
+      // Thêm mới các bảng ghi mới
+      await GarmentAccessoryNoteSchema.bulkCreate(
+        recordsToAdd.map((item) => {
+          return { ...item, status: 'active' } as GarmentAccessoryNote
+        })
+      )
+    }
+
+    if (recordsToDelete.length > 0) {
+      // Xoá các bản ghi không còn trong danh sách
+      await GarmentAccessoryNoteSchema.destroy({
+        where: {
+          accessoryNoteID: recordsToDelete.map((record) => record.accessoryNoteID),
+          garmentAccessoryID: query.id
+        }
+      })
+    }
+
+    const itemsUpdated = await GarmentAccessoryNoteSchema.findAll({
       where: {
-        accessoryNoteID: recordsToDelete.map((record) => record.accessoryNoteID)
-      }
+        [query.field]: query.id,
+        status: 'active'
+      },
+      include: [
+        { model: GarmentAccessorySchema, as: 'garmentAccessory' },
+        { model: AccessoryNoteSchema, as: 'accessoryNote' }
+      ]
     })
-
-    // Thêm mới các bảng ghi mới
-    await GarmentAccessoryNoteSchema.bulkCreate(recordsToAdd)
-
     // Trả về danh sách cập nhật sau xử lý
-    const updatedList = [...existingRecords.filter((record) => recordsToDelete.includes(record), ...recordsToAdd)]
-    return updatedList
+    // const updatedList = [...existingRecords.filter((record) => !recordsToDelete.includes(record), ...itemsCreated)]
+    return itemsUpdated
   } catch (error: any) {
     logging.error(NAMESPACE, `${error.message}`)
     throw {
@@ -153,9 +217,9 @@ export const deleteItemByPk = async (id: number) => {
   }
 }
 
-export const deleteItemByProductID = async (productID: number) => {
+export const deleteItemByGarmentAccessoryID = async (garmentAccessoryID: number) => {
   try {
-    const itemFound = await GarmentAccessoryNoteSchema.findOne({ where: { productID } })
+    const itemFound = await GarmentAccessoryNoteSchema.findOne({ where: { garmentAccessoryID } })
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.destroy()
     return { message: 'Deleted successfully' }

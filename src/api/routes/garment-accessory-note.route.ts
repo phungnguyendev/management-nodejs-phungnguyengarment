@@ -7,21 +7,19 @@ const router = Router()
 router.post(
   '/',
   validationRules([
-    { field: 'productID', type: 'int', location: 'body' },
-    { field: 'accessoryNoteID', type: 'int', location: 'body' },
     { field: 'garmentAccessoryID', type: 'int', location: 'body' },
-    { field: 'noteStatus', type: 'string', location: 'body' }
+    { field: 'accessoryNoteID', type: 'int', location: 'body' }
   ]),
   controller.createNewItem
 )
 
 router.get(
-  '/productID/:productID',
-  validationRules([{ field: 'productID', type: 'int', location: 'params' }]),
-  controller.getItemByProductID
+  '/garmentAccessoryID/:garmentAccessoryID',
+  validationRules([{ field: 'garmentAccessoryID', type: 'int', location: 'params' }]),
+  controller.getItemByGarmentAccessoryID
 )
 
-// Get item by productID and importedID
+// Get item by garmentAccessoryID and importedID
 router.get('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.getItemByPk)
 
 // Get all items
@@ -37,27 +35,27 @@ router.post(
 )
 
 router.put(
-  '/productID/:productID',
-  validationRules([{ field: 'productID', type: 'int', location: 'params' }]),
-  controller.updateItemsByProductID
+  '/garmentAccessoryID/:garmentAccessoryID',
+  validationRules([{ field: 'garmentAccessoryID', type: 'int', location: 'params' }]),
+  controller.updateItemsByGarmentAccessoryID
 )
 
 // Update item by productID and importedID
 router.patch('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.updateItemByPk)
 
 router.patch(
-  '/productID/:productID',
-  validationRules([{ field: 'productID', type: 'int', location: 'params' }]),
-  controller.updateItemByProductID
+  '/garmentAccessoryID/:garmentAccessoryID',
+  validationRules([{ field: 'garmentAccessoryID', type: 'int', location: 'params' }]),
+  controller.updateItemByGarmentAccessoryID
 )
 
 // Delete item by productID
 router.delete('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.deleteItemByPk)
 
 router.delete(
-  'productID/:productID',
-  validationRules([{ field: 'productID', type: 'int', location: 'params' }]),
-  controller.deleteItemByProductID
+  '/garmentAccessoryID/:garmentAccessoryID',
+  validationRules([{ field: 'garmentAccessoryID', type: 'int', location: 'params' }]),
+  controller.deleteItemByGarmentAccessoryID
 )
 
 export default router

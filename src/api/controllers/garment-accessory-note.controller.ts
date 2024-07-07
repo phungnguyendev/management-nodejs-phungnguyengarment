@@ -1,11 +1,11 @@
-import { NextFunction, Request, Response } from 'express'
+import { Request, Response } from 'express'
 import { GarmentAccessoryNote } from '~/models/garment-accessory-note.model'
 import * as service from '~/services/garment-accessory-note.service'
 import { RequestBodyType } from '~/type'
 
 const NAMESPACE = 'controllers/garment-accessory-note'
 
-export const createNewItem = async (req: Request, res: Response, next: NextFunction) => {
+export const createNewItem = async (req: Request, res: Response) => {
   try {
     const dataRequest: GarmentAccessoryNote = {
       ...req.body,
@@ -18,7 +18,7 @@ export const createNewItem = async (req: Request, res: Response, next: NextFunct
   }
 }
 
-export const getItemByPk = async (req: Request, res: Response, next: NextFunction) => {
+export const getItemByPk = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id)
     const itemFound = await service.getItemByPk(id)
@@ -28,17 +28,17 @@ export const getItemByPk = async (req: Request, res: Response, next: NextFunctio
   }
 }
 
-export const getItemByProductID = async (req: Request, res: Response, next: NextFunction) => {
+export const getItemByGarmentAccessoryID = async (req: Request, res: Response) => {
   try {
-    const productID = Number(req.params.productID)
-    const itemFound = await service.getItemByProductID(productID)
+    const garmentAccessoryID = Number(req.params.garmentAccessoryID)
+    const itemFound = await service.getItemByGarmentAccessoryID(garmentAccessoryID)
     return res.formatter.ok({ data: itemFound })
   } catch (error: any) {
     return res.formatter.badRequest({ error })
   }
 }
 
-export const getItems = async (req: Request, res: Response, next: NextFunction) => {
+export const getItems = async (req: Request, res: Response) => {
   try {
     const bodyRequest: RequestBodyType = {
       ...req.body
@@ -57,7 +57,7 @@ export const getItems = async (req: Request, res: Response, next: NextFunction) 
   }
 }
 
-export const updateItemByPk = async (req: Request, res: Response, next: NextFunction) => {
+export const updateItemByPk = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id)
     const itemRequest: GarmentAccessoryNote = {
@@ -70,31 +70,31 @@ export const updateItemByPk = async (req: Request, res: Response, next: NextFunc
   }
 }
 
-export const updateItemByProductID = async (req: Request, res: Response, next: NextFunction) => {
+export const updateItemByGarmentAccessoryID = async (req: Request, res: Response) => {
   try {
-    const productID = Number(req.params.productID)
+    const garmentAccessoryID = Number(req.params.garmentAccessoryID)
     const itemRequest: GarmentAccessoryNote = {
       ...req.body
     }
-    const itemUpdated = await service.updateItemByProductID(productID, itemRequest)
+    const itemUpdated = await service.updateItemByGarmentAccessoryID(garmentAccessoryID, itemRequest)
     return res.formatter.ok({ data: itemUpdated })
   } catch (error: any) {
     return res.formatter.badRequest({ error })
   }
 }
 
-export const updateItemsByProductID = async (req: Request, res: Response, next: NextFunction) => {
+export const updateItemsByGarmentAccessoryID = async (req: Request, res: Response) => {
   try {
-    const productID = Number(req.params.productID)
+    const garmentAccessoryID = Number(req.params.garmentAccessoryID)
     const records = req.body as GarmentAccessoryNote[]
-    const updatedItems = await service.updateItemsBy({ field: 'productID', id: productID }, records)
+    const updatedItems = await service.updateItemsBy({ field: 'garmentAccessoryID', id: garmentAccessoryID }, records)
     return res.formatter.ok({ data: updatedItems })
   } catch (error: any) {
     return res.formatter.badRequest({ error })
   }
 }
 
-export const deleteItemByPk = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteItemByPk = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id)
     const destroyed = await service.deleteItemByPk(id)
@@ -104,11 +104,11 @@ export const deleteItemByPk = async (req: Request, res: Response, next: NextFunc
   }
 }
 
-export const deleteItemByProductID = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteItemByGarmentAccessoryID = async (req: Request, res: Response) => {
   try {
-    const productID = Number(req.params.productID)
-    await service.deleteItemByProductID(productID)
-    return res.formatter.ok({})
+    const garmentAccessoryID = Number(req.params.garmentAccessoryID)
+    const destroyed = await service.deleteItemByGarmentAccessoryID(garmentAccessoryID)
+    return res.formatter.ok({ message: destroyed.message })
   } catch (error: any) {
     return res.formatter.badRequest({ error })
   }

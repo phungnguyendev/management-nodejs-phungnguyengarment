@@ -10,6 +10,7 @@ export type GarmentAccessory = {
   amountCutting?: number | null
   passingDeliveryDate?: string | null
   syncStatus?: boolean | null
+  notes?: string | null
   status?: ItemStatusType
 }
 
@@ -37,6 +38,9 @@ export default class GarmentAccessorySchema extends Model<GarmentAccessory> {
 
   @Column({ type: BOOLEAN, field: 'sync_status' })
   declare syncStatus: boolean
+
+  @Column({ type: STRING, field: 'notes' })
+  declare notes: string
 
   @BelongsTo(() => ProductSchema)
   declare product: ProductSchema
