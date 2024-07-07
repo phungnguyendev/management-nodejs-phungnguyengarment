@@ -10,7 +10,6 @@ export type CuttingGroup = {
   quantityRealCut?: number | null
   dateTimeCut?: string | null
   dateSendEmbroidered?: string | null
-  quantityDeliveredBTP?: string | null
   status?: ItemStatusType
   syncStatus?: boolean | null
   dateArrived1Th?: string | null
