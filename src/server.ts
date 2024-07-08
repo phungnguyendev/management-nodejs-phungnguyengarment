@@ -7,7 +7,7 @@ const PATH = 'model/index'
 
 // Start server
 const server = app
-  .listen(appConfig.server.server_port || 8001, () => {
+  .listen(appConfig.server.server_port, () => {
     console.log(`WSV eCommerce start with port ${appConfig.server.server_port}`)
   })
   .on('error', (err: any) => {

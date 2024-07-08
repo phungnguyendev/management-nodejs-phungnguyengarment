@@ -1,5 +1,5 @@
 import compression from 'compression'
-// import cors, { CorsOptions } from 'cors'
+import cors, { CorsOptions } from 'cors'
 import express from 'express'
 import helmet from 'helmet'
 import morgan from 'morgan'
@@ -10,13 +10,13 @@ import sequelize from './api/models'
 
 const app = express()
 
-// const corsOptions: CorsOptions = {
-//   origin: [
-//     'https://management.phungnguyengarment.vn',
-//     'https://www.management.phungnguyengarment.vn',
-//     'http://localhost:5173'
-//   ]
-// }
+const corsOptions: CorsOptions = {
+  origin: [
+    'https://management.phungnguyengarment.vn',
+    'https://www.management.phungnguyengarment.vn',
+    'http://localhost:5173'
+  ]
+}
 // Accept json body request
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -24,10 +24,10 @@ app.use(express.urlencoded({ extended: true }))
 app.use(morgan('dev'))
 app.use(helmet())
 app.use(compression())
-// app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }))
+app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }))
 // (morgan) HTTP request logger middleware for node.js
 // (cors) Provide some options Headers for accept others localhost to allow request
-// app.use(cors(corsOptions))
+app.use(cors(corsOptions))
 // Handle custom formatter response express (middleware)
 app.use(responseEnhancer())
 app.use('/api', routes)
