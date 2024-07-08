@@ -8,10 +8,7 @@ router.post(
   '/',
   validationRules([
     { field: 'sewingLineID', type: 'int', location: 'body' },
-    { field: 'productID', type: 'int', location: 'body' },
-    { field: 'quantityOriginal', type: 'int', location: 'body' },
-    { field: 'quantitySewed', type: 'int', location: 'body' },
-    { field: 'expiredDate', type: 'date', location: 'body' }
+    { field: 'productID', type: 'int', location: 'body' }
   ]),
   controller.createNewItem
 )
@@ -56,7 +53,7 @@ router.patch(
 router.delete('/:id', validationRules([{ field: 'id', type: 'int', location: 'params' }]), controller.deleteItemByPk)
 
 router.delete(
-  'productID/:productID',
+  '/productID/:productID',
   validationRules([{ field: 'productID', type: 'int', location: 'params' }]),
   controller.deleteItemByProductID
 )

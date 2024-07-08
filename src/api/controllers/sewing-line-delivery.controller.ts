@@ -107,8 +107,8 @@ export const deleteItemByPk = async (req: Request, res: Response, next: NextFunc
 export const deleteItemByProductID = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const productID = Number(req.params.productID)
-    await service.deleteItemByProductID(productID)
-    return res.formatter.ok({})
+    const destroyed = await service.deleteItemByProductID(productID)
+    return res.formatter.ok({ message: destroyed.message })
   } catch (error: any) {
     return res.formatter.badRequest({ error })
   }

@@ -1,14 +1,24 @@
 import { dynamicQuery } from '~/helpers/query'
 import SewingLineDeliverySchema, { SewingLineDelivery } from '~/models/sewing-line-delivery.model'
 import { ErrorType, RequestBodyType } from '~/type'
+import sequelize from '../models'
+import ProductSchema from '../models/product.model'
 import SewingLineSchema from '../models/sewing-line.model'
 
 const NAMESPACE = 'services/sewing-line-delivery'
 
 export const createNewItem = async (item: SewingLineDelivery) => {
   try {
+    const foundItem = await SewingLineDeliverySchema.findOne({ where: { productID: item.productID } })
+    if (foundItem) throw new Error(`Data already exist!`)
     const newItem = await SewingLineDeliverySchema.create(item)
-    return newItem
+    const createdItem = await SewingLineDeliverySchema.findByPk(newItem.id, {
+      include: [
+        { model: SewingLineSchema, as: 'sewingLine' },
+        { model: ProductSchema, as: 'product' }
+      ]
+    })
+    return createdItem
   } catch (error: any) {
     throw {
       error: `Error create item`,
@@ -20,7 +30,12 @@ export const createNewItem = async (item: SewingLineDelivery) => {
 // Get by id
 export const getItemByPk = async (id: number) => {
   try {
-    const itemFound = await SewingLineDeliverySchema.findByPk(id)
+    const itemFound = await SewingLineDeliverySchema.findByPk(id, {
+      include: [
+        { model: SewingLineSchema, as: 'sewingLine' },
+        { model: ProductSchema, as: 'product' }
+      ]
+    })
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
@@ -33,7 +48,13 @@ export const getItemByPk = async (id: number) => {
 
 export const getItemByProductID = async (productID: number) => {
   try {
-    const itemFound = await SewingLineDeliverySchema.findOne({ where: { productID } })
+    const itemFound = await SewingLineDeliverySchema.findOne({
+      where: { productID },
+      include: [
+        { model: SewingLineSchema, as: 'sewingLine' },
+        { model: ProductSchema, as: 'product' }
+      ]
+    })
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
@@ -52,7 +73,10 @@ export const getItems = async (body: RequestBodyType) => {
       limit: body.paginator.pageSize === -1 ? undefined : body.paginator.pageSize,
       order: [[body.sorting.column, body.sorting.direction]],
       where: dynamicQuery<SewingLineDelivery>(body),
-      include: [{ model: SewingLineSchema, as: 'sewingLine' }]
+      include: [
+        { model: SewingLineSchema, as: 'sewingLine' },
+        { model: ProductSchema, as: 'product' }
+      ]
     })
     return items
   } catch (error: any) {
@@ -69,7 +93,13 @@ export const updateItemByPk = async (id: number, itemToUpdate: SewingLineDeliver
     const itemFound = await SewingLineDeliverySchema.findByPk(id)
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.update(itemToUpdate)
-    return itemToUpdate
+    const updatedItem = await SewingLineDeliverySchema.findByPk(itemFound.id, {
+      include: [
+        { model: SewingLineSchema, as: 'sewingLine' },
+        { model: ProductSchema, as: 'product' }
+      ]
+    })
+    return updatedItem
   } catch (error: any) {
     throw {
       error: `Error update item`,
@@ -84,7 +114,14 @@ export const updateItemByProductID = async (productID: number, itemToUpdate: Sew
     const itemFound = await SewingLineDeliverySchema.findOne({ where: { productID } })
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.update(itemToUpdate)
-    return itemToUpdate
+    const updatedItem = await SewingLineDeliverySchema.findOne({
+      where: { productID },
+      include: [
+        { model: SewingLineSchema, as: 'sewingLine' },
+        { model: ProductSchema, as: 'product' }
+      ]
+    })
+    return updatedItem
   } catch (error: any) {
     throw {
       error: `Error update item`,
@@ -94,9 +131,10 @@ export const updateItemByProductID = async (productID: number, itemToUpdate: Sew
 }
 
 export const updateItemsBy = async (query: { field: string; id: number }, itemsUpdate: SewingLineDelivery[]) => {
+  const transaction = await sequelize.transaction()
   try {
     // return updatedItems
-    const existingRecords = await SewingLineDeliverySchema.findAll({ where: { [query.field]: query.id } })
+    const existingRecords = await SewingLineDeliverySchema.findAll({ where: { [query.field]: query.id }, transaction })
 
     // Tìm các bản ghi cần xoá
     const recordsToDelete = existingRecords.filter(
@@ -110,24 +148,60 @@ export const updateItemsBy = async (query: { field: string; id: number }, itemsU
         !existingRecords.some((existingRecord) => existingRecord.sewingLineID === updatedRecord.sewingLineID)
     )
 
-    // Xoá các bản ghi không còn trong danh sách
-    await SewingLineDeliverySchema.destroy({
+    if (recordsToAdd.length > 0) {
+      // Thêm mới các bảng ghi mới
+      await SewingLineDeliverySchema.bulkCreate(
+        recordsToAdd.map((item) => {
+          return { ...item, status: 'active' } as SewingLineDelivery
+        }),
+        { transaction }
+      )
+    }
+
+    if (recordsToDelete.length > 0) {
+      // Xoá các bản ghi không còn trong danh sách
+      await SewingLineDeliverySchema.destroy({
+        where: {
+          sewingLineID: recordsToDelete.map((record) => record.sewingLineID),
+          productID: query.id
+        },
+        transaction
+      })
+    }
+
+    if (recordsToAdd.length <= 0 && recordsToDelete.length <= 0) {
+      // Xoá các bản ghi không còn trong danh sách
+      await Promise.all(
+        itemsUpdate.map((item) =>
+          SewingLineDeliverySchema.update(item, {
+            where: { sewingLineID: item.sewingLineID, productID: query.id },
+            transaction
+          })
+        )
+      )
+    }
+
+    const itemsUpdated = await SewingLineDeliverySchema.findAll({
       where: {
-        sewingLineID: recordsToDelete.map((record) => record.sewingLineID)
-      }
+        [query.field]: query.id,
+        status: 'active'
+      },
+      include: [
+        { model: SewingLineSchema, as: 'sewingLine' },
+        { model: ProductSchema, as: 'product' }
+      ],
+      transaction
     })
 
-    // Thêm mới các bảng ghi mới
-    const itemsCreated = await SewingLineDeliverySchema.bulkCreate(
-      recordsToAdd.map((item) => {
-        return { ...item, status: 'active' } as SewingLineDelivery
-      })
-    )
+    await transaction.commit()
 
     // Trả về danh sách cập nhật sau xử lý
-    const updatedList = [...existingRecords.filter((record) => !recordsToDelete.includes(record)), ...itemsCreated]
-    return updatedList
+    // const updatedList = [...existingRecords.filter((record) => !recordsToDelete.includes(record)), ...itemsCreated]
+    return itemsUpdated
   } catch (error: any) {
+    // Rollback giao dịch nếu có lỗi
+    await transaction.rollback()
+
     throw {
       error: `Error update multiple item`,
       errorDetail: `${error.message}`
