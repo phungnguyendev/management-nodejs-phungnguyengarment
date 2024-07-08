@@ -1,13 +1,19 @@
-import { getItemsQuery } from '~/helpers/query'
 import CompletionSchema, { Completion } from '~/models/completion.model'
 import { ErrorType, RequestBodyType } from '~/type'
+import { dynamicQuery } from '../helpers/query'
+import ProductSchema from '../models/product.model'
 
 const NAMESPACE = 'services/completion'
 
 export const createNewItem = async (item: Completion) => {
   try {
+    const foundItem = await CompletionSchema.findOne({ where: { productID: item.productID } })
+    if (foundItem) throw new Error(`Data already exist!`)
     const newItem = await CompletionSchema.create(item)
-    return newItem
+    const createdItem = await CompletionSchema.findByPk(newItem.id, {
+      include: [{ model: ProductSchema, as: 'product' }]
+    })
+    return createdItem
   } catch (error: any) {
     throw {
       error: `Error create item`,
@@ -19,7 +25,7 @@ export const createNewItem = async (item: Completion) => {
 // Get by id
 export const getItemByPk = async (id: number) => {
   try {
-    const itemFound = await CompletionSchema.findByPk(id)
+    const itemFound = await CompletionSchema.findByPk(id, { include: [{ model: ProductSchema, as: 'product' }] })
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
@@ -32,7 +38,10 @@ export const getItemByPk = async (id: number) => {
 
 export const getItemByProductID = async (productID: number) => {
   try {
-    const itemFound = await CompletionSchema.findOne({ where: { productID } })
+    const itemFound = await CompletionSchema.findOne({
+      where: { productID },
+      include: [{ model: ProductSchema, as: 'product' }]
+    })
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
@@ -46,7 +55,13 @@ export const getItemByProductID = async (productID: number) => {
 // Get all
 export const getItems = async (body: RequestBodyType) => {
   try {
-    const items = await CompletionSchema.findAndCountAll(getItemsQuery(body))
+    const items = await CompletionSchema.findAndCountAll({
+      offset: (Number(body.paginator.page) - 1) * Number(body.paginator.pageSize),
+      limit: body.paginator.pageSize === -1 ? undefined : body.paginator.pageSize,
+      order: [[body.sorting.column, body.sorting.direction]],
+      where: dynamicQuery<Completion>(body),
+      include: [{ model: ProductSchema, as: 'product' }]
+    })
     return items
   } catch (error: any) {
     throw {
@@ -62,7 +77,10 @@ export const updateItemByPk = async (id: number, itemToUpdate: Completion) => {
     const itemFound = await CompletionSchema.findByPk(id)
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.update(itemToUpdate)
-    return itemToUpdate
+    const updatedItem = await CompletionSchema.findByPk(itemFound.id, {
+      include: [{ model: ProductSchema, as: 'product' }]
+    })
+    return updatedItem
   } catch (error: any) {
     throw {
       error: `Error update item`,
@@ -76,31 +94,14 @@ export const updateItemByProductID = async (productID: number, itemToUpdate: Com
     const itemFound = await CompletionSchema.findOne({ where: { productID } })
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.update(itemToUpdate)
-    return itemToUpdate
+    const updatedItem = await CompletionSchema.findOne({
+      where: { productID },
+      include: [{ model: ProductSchema, as: 'product' }]
+    })
+    return updatedItem
   } catch (error: any) {
     throw {
       error: `Error update item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
-  }
-}
-
-export const updateItems = async (itemsUpdate: Completion[]) => {
-  try {
-    const updatedItems = await Promise.all(
-      itemsUpdate.map(async (item) => {
-        const user = await CompletionSchema.findByPk(item.id)
-        if (!user) {
-          throw new Error(`Item with id ${item.id} not found`)
-        }
-        await user.update(item)
-        return user
-      })
-    )
-    return updatedItems
-  } catch (error: any) {
-    throw {
-      error: `Error update multiple item`,
       errorDetail: `${error.message}`
     } as ErrorType
   }
