@@ -7,9 +7,9 @@ const { INTEGER, STRING, FLOAT, DATE } = DataType
 export type DateSubmission = {
   id?: number
   sampleSewingID?: number
-  dateSubmission?: STRING
-  dateSubmissionNPL?: STRING
-  dateApprovalSO?: STRING
+  dateSubmission?: string
+  dateSubmissionNPL?: string
+  dateApprovalSO?: string
   status?: ItemStatusType
 }
 
@@ -27,16 +27,16 @@ export default class DateSubmissionSchema extends Model<DateSubmission> {
   declare sampleSewingID: number
 
   @Column({ type: STRING, field: 'date_submission' })
-  declare dateSubmission: STRING
+  declare dateSubmission: string
 
   @Column({ type: STRING, field: 'date_submission_npl' })
-  declare dateSubmissionNPL: STRING
+  declare dateSubmissionNPL: string
 
   @Column({ type: STRING, field: 'summary' })
   declare summary: string
 
   @Column({ type: STRING, field: 'date_approval_so' })
-  declare dateApprovalSO: STRING
+  declare dateApprovalSO: string
 
   @Column({ type: STRING, field: 'status' })
   declare status: string

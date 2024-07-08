@@ -15,7 +15,7 @@ export const countdownTimer = async (seconds: number): Promise<boolean> => {
   })
 }
 
-export const isExpiredDate = (expiryDate: STRING): boolean => {
+export const isExpiredDate = (expiryDate: Date): boolean => {
   const currentTime = new Date()
   return currentTime >= expiryDate
 }
@@ -32,7 +32,7 @@ export const getTimeRemaining = (expiryDateString: string): number => {
 }
 
 // Tạo thời gian hết hạn 60 giây sau thời điểm hiện tại
-export const createExpiryDate = (seconds: number = 60): STRING => {
+export const createExpiryDate = (seconds: number = 60): Date => {
   const currentTime = new Date()
   return new Date(currentTime.getTime() + seconds * 1000)
 }
