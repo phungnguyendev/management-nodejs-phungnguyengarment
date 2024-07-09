@@ -96,6 +96,18 @@ export const deleteItemByPk = async (id: number) => {
   try {
     const itemFound = await GarmentAccessorySchema.findByPk(id)
     if (!itemFound) throw new Error(`Item not found`)
+    const garmentAccessoryNotes = await GarmentAccessoryNoteSchema.findAll({
+      where: { garmentAccessoryID: itemFound.id }
+    })
+    if (garmentAccessoryNotes.length > 0) {
+      await Promise.all(
+        garmentAccessoryNotes.map((item) =>
+          GarmentAccessoryNoteSchema.destroy({
+            where: { id: item.id, garmentAccessoryID: id }
+          })
+        )
+      )
+    }
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
@@ -108,17 +120,18 @@ export const deleteItemByProductID = async (productID: number) => {
     const itemFound = await GarmentAccessorySchema.findOne({ where: { productID } })
     if (!itemFound) throw new Error(`Item not found`)
     // Xoá các ràng buộc trước
-    const itemGarmentAccessoryNoteFound = await GarmentAccessoryNoteSchema.findAll({
+    const garmentAccessoryNotes = await GarmentAccessoryNoteSchema.findAll({
       where: { garmentAccessoryID: itemFound.id }
     })
-    if (!itemGarmentAccessoryNoteFound) throw new Error(`Item not found`)
-    await GarmentAccessoryNoteSchema.destroy({
-      where: {
-        garmentAccessoryID: itemGarmentAccessoryNoteFound.map((item) => {
-          return item.garmentAccessoryID
-        })
-      }
-    })
+    if (garmentAccessoryNotes.length > 0) {
+      await Promise.all(
+        garmentAccessoryNotes.map((item) =>
+          GarmentAccessoryNoteSchema.destroy({
+            where: { id: item.id, garmentAccessoryID: itemFound.id }
+          })
+        )
+      )
+    }
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {

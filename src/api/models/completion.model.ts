@@ -17,7 +17,7 @@ export type Completion = {
 
 @Table({
   modelName: 'Completion',
-  tableName: 'completion',
+  tableName: 'completions',
   timestamps: true
 })
 export default class CompletionSchema extends Model<Completion> {

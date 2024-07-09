@@ -210,13 +210,35 @@ export const deleteItemByProductID = async (productID: number) => {
   }
 }
 
+export const deleteItemsByPk = async (id: number) => {
+  try {
+    const itemsFound = await SewingLineDeliverySchema.findAll({ where: { id } })
+    if (itemsFound.length > 0) {
+      await Promise.all(
+        itemsFound.map((item) =>
+          SewingLineDeliverySchema.destroy({
+            where: { id: item.id }
+          })
+        )
+      )
+    }
+    return { message: 'Deleted all item successfully' }
+  } catch (error: any) {
+    throw `${error.message}`
+  }
+}
+
 export const deleteItemsByProductID = async (productID: number) => {
   try {
     const itemsFound = await SewingLineDeliverySchema.findAll({ where: { productID } })
     if (itemsFound.length > 0) {
-      itemsFound.forEach(async (item) => {
-        await item.destroy()
-      })
+      await Promise.all(
+        itemsFound.map((item) =>
+          SewingLineDeliverySchema.destroy({
+            where: { id: item.id, productID: productID }
+          })
+        )
+      )
     }
     return { message: 'Deleted all item successfully' }
   } catch (error: any) {

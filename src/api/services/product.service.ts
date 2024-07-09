@@ -5,6 +5,7 @@ import * as cuttingGroupService from '~/services/cutting-group.service'
 import * as garmentAccessoryService from '~/services/garment-accessory.service'
 import * as importationService from '~/services/importation.service'
 import * as printablePlaceService from '~/services/printable-place.service'
+import * as productColorService from '~/services/product-color.service'
 import * as productGroupService from '~/services/product-group.service'
 import * as sampleSewingService from '~/services/sample-sewing.service'
 import * as sewingLineDeliveryService from '~/services/sewing-line-delivery.service'
@@ -101,15 +102,15 @@ export const deleteItemByPk = async (id: number) => {
 
     // item
     const productColorFound = await ProductColorSchema.findOne({ where: { productID: id } })
-    if (productColorFound) await completionService.deleteItemByProductID(id)
+    if (productColorFound) await productColorService.deleteItemByPk(productColorFound.id)
 
     // item
     const productGroupFound = await ProductGroupSchema.findOne({ where: { productID: id } })
-    if (productGroupFound) await productGroupService.deleteItemByProductID(id)
+    if (productGroupFound) await productGroupService.deleteItemByPk(productGroupFound.id)
 
     // item
     const printablePlaceFound = await PrintablePlaceSchema.findOne({ where: { productID: id } })
-    if (printablePlaceFound) await printablePlaceService.deleteItemByProductID(id)
+    if (printablePlaceFound) await printablePlaceService.deleteItemByPk(printablePlaceFound.id)
 
     // items
     const importationsFound = await ImportationSchema.findAll({ where: { productID: id } })
@@ -117,15 +118,15 @@ export const deleteItemByPk = async (id: number) => {
 
     // item
     const sampleSewingFound = await SampleSewingSchema.findOne({ where: { productID: id } })
-    if (sampleSewingFound) await sampleSewingService.deleteItemByProductID(id)
+    if (sampleSewingFound) await sampleSewingService.deleteItemByPk(sampleSewingFound.id)
 
-    // item
+    // itemC
     const garmentAccessoryFound = await GarmentAccessorySchema.findOne({ where: { productID: id } })
-    if (garmentAccessoryFound) await garmentAccessoryService.deleteItemByProductID(id)
+    if (garmentAccessoryFound) await garmentAccessoryService.deleteItemByPk(garmentAccessoryFound.id)
 
     // item
     const cuttingGroupFound = await CuttingGroupSchema.findOne({ where: { productID: id } })
-    if (cuttingGroupFound) await cuttingGroupService.deleteItemByProductID(id)
+    if (cuttingGroupFound) await cuttingGroupService.deleteItemByPk(cuttingGroupFound.id)
 
     // items
     const sewingLineDeliveriesFound = await SewingLineDeliverySchema.findAll({ where: { productID: id } })
@@ -133,7 +134,9 @@ export const deleteItemByPk = async (id: number) => {
 
     // item
     const completionFound = await CompletionSchema.findOne({ where: { productID: id } })
-    if (completionFound) await completionService.deleteItemByProductID(id)
+    if (completionFound) {
+      console.log('Completion 123')
+    }
 
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
