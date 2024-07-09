@@ -1,6 +1,6 @@
 import { getItemsQuery } from '~/helpers/query'
 import SewingLineSchema, { SewingLine } from '~/models/sewing-line.model'
-import { ErrorType, RequestBodyType } from '~/type'
+import { RequestBodyType } from '~/type'
 
 const NAMESPACE = 'services/sewing-line'
 
@@ -9,10 +9,7 @@ export const createNewItem = async (item: SewingLine) => {
     const newItem = await SewingLineSchema.create(item)
     return newItem
   } catch (error: any) {
-    throw {
-      error: `Error create item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -23,10 +20,7 @@ export const getItemByPk = async (id: number) => {
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
-    throw {
-      error: `Error get item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -36,10 +30,7 @@ export const getItems = async (body: RequestBodyType) => {
     const items = await SewingLineSchema.findAndCountAll(getItemsQuery(body))
     return items
   } catch (error: any) {
-    throw {
-      error: `Error get list`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -51,10 +42,7 @@ export const updateItemByPk = async (id: number, itemToUpdate: SewingLine) => {
     await itemFound.update(itemToUpdate)
     return itemToUpdate
   } catch (error: any) {
-    throw {
-      error: `Error update item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -72,10 +60,7 @@ export const updateItems = async (itemsUpdate: SewingLine[]) => {
     )
     return updatedItems
   } catch (error: any) {
-    throw {
-      error: `Error update multiple item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -87,9 +72,6 @@ export const deleteItemByPk = async (id: number) => {
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw {
-      error: `Error delete item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }

@@ -6,7 +6,6 @@ import { codeGenerator, otpGenerator } from '~/api/utils'
 import { mailOptionVerifyOTPCode, transporter } from '~/config/nodemailer.config'
 import UserSchema from '~/models/user.model'
 import * as tokenService from '~/services/auth/token.service'
-import { ErrorType } from '~/type'
 
 const NAMESPACE = 'Auth'
 const PATH = 'services/auth'
@@ -25,10 +24,7 @@ export const login = async (email: string, password: string) => {
     delete userFound.dataValues.password
     return { ...userFound.dataValues, accessToken, refreshToken }
   } catch (error: any) {
-    throw {
-      error: `Error login`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -49,10 +45,7 @@ export const verifyEmailAndSendOTP = async (email: string) => {
     delete userFound.dataValues.password
     return userFound
   } catch (error: any) {
-    throw {
-      error: `Error verify email and send otp`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -77,10 +70,7 @@ export const verifyOTPCode = async (email: string, otp: string) => {
     delete userFound.dataValues.password
     return userFound
   } catch (error: any) {
-    throw {
-      error: `Error verify otp code`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -101,10 +91,7 @@ export const getUserInfoFromAccessToken = async (authToken: string) => {
     delete userFound.dataValues.accessKey
     return { user: userFound, userRoles: userRolesFound }
   } catch (error: any) {
-    throw {
-      error: `Error get user from accessToken`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -120,9 +107,6 @@ export const resetPasswordWithAccesskey = async (email: string, newPassword: str
     delete userFound.dataValues.accessKey
     return userFound
   } catch (error: any) {
-    throw {
-      error: `Error reset password`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }

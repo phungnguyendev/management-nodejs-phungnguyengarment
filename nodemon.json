@@ -4,3 +4,4 @@
   "ignore": [],
   "exec": "npx ts-node ./src/server.ts"
 }
+  

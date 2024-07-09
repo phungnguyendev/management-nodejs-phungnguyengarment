@@ -2,7 +2,6 @@ import { Op } from 'sequelize'
 import { dateFormatterToString, expiresDateFormJWTConfig } from '~/api/helpers/date.helper'
 import { decodeToken, generateToken, jwtConfig, verifyToken } from '~/api/helpers/jsonwebtoken.helper'
 import TokenSchema from '~/models/token.model'
-import { ErrorType } from '~/type'
 
 const NAMESPACE = 'services/token'
 
@@ -13,10 +12,7 @@ export const getToken = async (userID: number): Promise<TokenSchema> => {
     if (!tokenFound) throw new Error(`Token not found`)
     return tokenFound
   } catch (error: any) {
-    throw {
-      error: `Error get token`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -37,10 +33,7 @@ export const generateAndSaveTokens = async (userID: number) => {
     await TokenSchema.create({ userID, refreshToken, expiresAt: dateFormatterToString(expiresAt, 'iso8601') })
     return { accessToken, refreshToken }
   } catch (error: any) {
-    throw {
-      error: `Error generate and save token`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -62,10 +55,7 @@ export const refreshAccessToken = async (refreshToken: string): Promise<string> 
     if (!storedToken) throw new Error(`Refresh token not found or expired!`)
     return generateToken({ userID: payload.userID }, 'access_token')
   } catch (error: any) {
-    throw {
-      error: `Error refresh accessToken`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -83,9 +73,6 @@ export const revokeRefreshToken = async (refreshToken: string) => {
     await storedToken.destroy()
     return { message: `Logout successfully!` }
   } catch (error: any) {
-    throw {
-      error: `Error revoke refreshToken`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }

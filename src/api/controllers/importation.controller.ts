@@ -14,7 +14,7 @@ export const createNewItem = async (req: Request, res: Response, next: NextFunct
     const newItem = await service.createNewItem(dataRequest)
     return res.formatter.created({ data: newItem })
   } catch (error: any) {
-    return res.formatter.badRequest({ error })
+    return res.formatter.badRequest({ message: error })
   }
 }
 
@@ -24,7 +24,7 @@ export const getItemByPk = async (req: Request, res: Response, next: NextFunctio
     const itemFound = await service.getItemByPk(id)
     return res.formatter.ok({ data: itemFound })
   } catch (error: any) {
-    return res.formatter.badRequest({ error })
+    return res.formatter.badRequest({ message: error })
   }
 }
 
@@ -34,7 +34,7 @@ export const getItemByProductID = async (req: Request, res: Response, next: Next
     const itemFound = await service.getItemByProductID(productID)
     return res.formatter.ok({ data: itemFound })
   } catch (error: any) {
-    return res.formatter.badRequest({ error })
+    return res.formatter.badRequest({ message: error })
   }
 }
 
@@ -53,7 +53,7 @@ export const getItems = async (req: Request, res: Response, next: NextFunction) 
       total: bodyRequest.search.term.length > 0 ? items.count : countAll.count
     })
   } catch (error: any) {
-    return res.formatter.badRequest({ error })
+    return res.formatter.badRequest({ message: error })
   }
 }
 
@@ -66,7 +66,7 @@ export const updateItemByPk = async (req: Request, res: Response, next: NextFunc
     const itemUpdated = await service.updateItemByPk(id, itemRequest)
     return res.formatter.ok({ data: itemUpdated })
   } catch (error: any) {
-    return res.formatter.badRequest({ error })
+    return res.formatter.badRequest({ message: error })
   }
 }
 
@@ -79,7 +79,7 @@ export const updateItemByProductID = async (req: Request, res: Response, next: N
     const itemUpdated = await service.updateItemByProductID(productID, itemRequest)
     return res.formatter.ok({ data: itemUpdated })
   } catch (error: any) {
-    return res.formatter.badRequest({ error })
+    return res.formatter.badRequest({ message: error })
   }
 }
 
@@ -89,7 +89,7 @@ export const deleteItemByPk = async (req: Request, res: Response, next: NextFunc
     const destroyed = await service.deleteItemByPk(id)
     return res.formatter.ok({ message: destroyed.message })
   } catch (error: any) {
-    return res.formatter.badRequest({ error })
+    return res.formatter.badRequest({ message: error })
   }
 }
 
@@ -99,6 +99,6 @@ export const deleteItemByProductID = async (req: Request, res: Response, next: N
     await service.deleteItemByProductID(productID)
     return res.formatter.ok({})
   } catch (error: any) {
-    return res.formatter.badRequest({ error })
+    return res.formatter.badRequest({ message: error })
   }
 }

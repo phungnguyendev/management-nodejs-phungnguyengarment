@@ -1,6 +1,15 @@
 import { getItemsQuery } from '~/helpers/query'
 import ProductSchema, { Product } from '~/models/product.model'
-import { ErrorType, RequestBodyType } from '~/type'
+import { RequestBodyType } from '~/type'
+import CompletionSchema from '../models/completion.model'
+import CuttingGroupSchema from '../models/cutting-group.model'
+import GarmentAccessorySchema from '../models/garment-accessory.model'
+import ImportationSchema from '../models/importation.model'
+import PrintablePlaceSchema from '../models/printable-place.model'
+import ProductColorSchema from '../models/product-color.model'
+import ProductGroupSchema from '../models/product-group.model'
+import SampleSewingSchema from '../models/sample-sewing.model'
+import SewingLineDeliverySchema from '../models/sewing-line-delivery.model'
 
 const NAMESPACE = 'services/products'
 
@@ -9,10 +18,7 @@ export const createNewItem = async (item: Product) => {
     const newItem = await ProductSchema.create(item)
     return newItem
   } catch (error: any) {
-    throw {
-      error: `Error create item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -23,10 +29,7 @@ export const getItemByPk = async (id: number) => {
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
-    throw {
-      error: `Error get item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -37,10 +40,7 @@ export const getItemByProductCode = async (productCode: string) => {
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
-    throw {
-      error: `Error get item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -50,10 +50,7 @@ export const getItems = async (body: RequestBodyType) => {
     const items = await ProductSchema.findAndCountAll(getItemsQuery(body))
     return items
   } catch (error: any) {
-    throw {
-      error: `Error get list`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -65,10 +62,7 @@ export const updateItemByPk = async (id: number, itemToUpdate: Product) => {
     await itemFound.update(itemToUpdate)
     return itemFound
   } catch (error: any) {
-    throw {
-      error: `Error update item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -86,10 +80,7 @@ export const updateItems = async (itemsUpdate: Product[]) => {
     )
     return updatedItems
   } catch (error: any) {
-    throw {
-      error: `Error update multiple item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -98,12 +89,55 @@ export const deleteItemByPk = async (id: number) => {
   try {
     const itemFound = await ProductSchema.findByPk(id)
     if (!itemFound) throw new Error(`Item not found`)
+    // ProductColor, ProductGroup, PrintablePlace, Importation, SampleSewing, GarmentAccessory, CuttingGroup, SewingLine, Completion
+
+    // item
+    const productColorFound = await ProductColorSchema.findOne({ where: { productID: id } })
+    if (productColorFound) await productColorFound.destroy()
+
+    // item
+    const productGroupFound = await ProductGroupSchema.findOne({ where: { productID: id } })
+    if (productGroupFound) await productGroupFound.destroy()
+
+    // item
+    const printablePlaceFound = await PrintablePlaceSchema.findOne({ where: { productID: id } })
+    if (printablePlaceFound) await printablePlaceFound.destroy()
+
+    // items
+    const importationsFound = await ImportationSchema.findAll({ where: { productID: id } })
+    if (importationsFound.length > 0) {
+      importationsFound.forEach(async (item) => {
+        await item.destroy()
+      })
+    }
+
+    // item
+    const sampleSewingFound = await SampleSewingSchema.findOne({ where: { productID: id } })
+    if (sampleSewingFound) await sampleSewingFound.destroy()
+
+    // item
+    const garmentAccessoryFound = await GarmentAccessorySchema.findOne({ where: { productID: id } })
+    if (garmentAccessoryFound) await garmentAccessoryFound.destroy()
+
+    // item
+    const cuttingGroupFound = await CuttingGroupSchema.findOne({ where: { productID: id } })
+    if (cuttingGroupFound) await cuttingGroupFound.destroy()
+
+    // items
+    const sewingLineDeliveryFound = await SewingLineDeliverySchema.findAll({ where: { productID: id } })
+    if (sewingLineDeliveryFound.length > 0) {
+      sewingLineDeliveryFound.forEach(async (item) => {
+        await item.destroy()
+      })
+    }
+
+    // item
+    const completionFound = await CompletionSchema.findOne({ where: { productID: id } })
+    if (completionFound) await completionFound.destroy()
+
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw {
-      error: `Error delete item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }

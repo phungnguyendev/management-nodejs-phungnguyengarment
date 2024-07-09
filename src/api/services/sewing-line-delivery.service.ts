@@ -1,6 +1,6 @@
 import { dynamicQuery } from '~/helpers/query'
 import SewingLineDeliverySchema, { SewingLineDelivery } from '~/models/sewing-line-delivery.model'
-import { ErrorType, RequestBodyType } from '~/type'
+import { RequestBodyType } from '~/type'
 import sequelize from '../models'
 import ProductSchema from '../models/product.model'
 import SewingLineSchema from '../models/sewing-line.model'
@@ -20,10 +20,7 @@ export const createNewItem = async (item: SewingLineDelivery) => {
     })
     return createdItem
   } catch (error: any) {
-    throw {
-      error: `Error create item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -39,10 +36,7 @@ export const getItemByPk = async (id: number) => {
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
-    throw {
-      error: `Error get item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -58,10 +52,7 @@ export const getItemByProductID = async (productID: number) => {
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
-    throw {
-      error: `Error get item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -80,10 +71,7 @@ export const getItems = async (body: RequestBodyType) => {
     })
     return items
   } catch (error: any) {
-    throw {
-      error: `Error get list`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -101,10 +89,7 @@ export const updateItemByPk = async (id: number, itemToUpdate: SewingLineDeliver
     })
     return updatedItem
   } catch (error: any) {
-    throw {
-      error: `Error update item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -123,10 +108,7 @@ export const updateItemByProductID = async (productID: number, itemToUpdate: Sew
     })
     return updatedItem
   } catch (error: any) {
-    throw {
-      error: `Error update item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -201,11 +183,7 @@ export const updateItemsBy = async (query: { field: string; id: number }, itemsU
   } catch (error: any) {
     // Rollback giao dịch nếu có lỗi
     await transaction.rollback()
-
-    throw {
-      error: `Error update multiple item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -217,10 +195,7 @@ export const deleteItemByPk = async (id: number) => {
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw {
-      error: `Error delete item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -231,9 +206,6 @@ export const deleteItemByProductID = async (productID: number) => {
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw {
-      error: `Error delete item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }

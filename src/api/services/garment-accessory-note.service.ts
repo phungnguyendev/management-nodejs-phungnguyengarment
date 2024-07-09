@@ -26,10 +26,7 @@ export const createNewItem = async (item: GarmentAccessoryNote) => {
     })
     return itemCreated
   } catch (error: any) {
-    throw {
-      error: `Error create item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -45,10 +42,7 @@ export const getItemByPk = async (id: number) => {
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
-    throw {
-      error: `Error get item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -64,10 +58,7 @@ export const getItemByGarmentAccessoryID = async (garmentAccessoryID: number) =>
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
-    throw {
-      error: `Error get item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -86,10 +77,7 @@ export const getItems = async (body: RequestBodyType) => {
     })
     return items
   } catch (error: any) {
-    throw {
-      error: `Error get list`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -107,10 +95,7 @@ export const updateItemByPk = async (id: number, itemToUpdate: GarmentAccessoryN
     })
     return itemUpdated
   } catch (error: any) {
-    throw {
-      error: `Error update item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -131,10 +116,7 @@ export const updateItemByGarmentAccessoryID = async (
     })
     return itemUpdated
   } catch (error: any) {
-    throw {
-      error: `Error update item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -194,11 +176,7 @@ export const updateItemsBy = async (
     // const updatedList = [...existingRecords.filter((record) => !recordsToDelete.includes(record), ...itemsCreated)]
     return itemsUpdated
   } catch (error: any) {
-    logging.error(NAMESPACE, `${error.message}`)
-    throw {
-      error: `Error update multiple item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -210,10 +188,7 @@ export const deleteItemByPk = async (id: number) => {
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw {
-      error: `Error delete item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -224,9 +199,6 @@ export const deleteItemByGarmentAccessoryID = async (garmentAccessoryID: number)
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw {
-      error: `Error delete item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }

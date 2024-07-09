@@ -14,7 +14,7 @@ export const createNewItem = async (req: Request, res: Response) => {
     const newItem = await service.createNewItem(dataRequest)
     return res.formatter.created({ data: newItem })
   } catch (error: any) {
-    return res.formatter.badRequest({ error })
+    return res.formatter.badRequest({ message: error })
   }
 }
 
@@ -24,7 +24,7 @@ export const getItemByPk = async (req: Request, res: Response) => {
     const itemFound = await service.getItemByPk(id)
     return res.formatter.ok({ data: itemFound })
   } catch (error: any) {
-    return res.formatter.badRequest({ error })
+    return res.formatter.badRequest({ message: error })
   }
 }
 
@@ -34,7 +34,7 @@ export const getItemByGarmentAccessoryID = async (req: Request, res: Response) =
     const itemFound = await service.getItemByGarmentAccessoryID(garmentAccessoryID)
     return res.formatter.ok({ data: itemFound })
   } catch (error: any) {
-    return res.formatter.badRequest({ error })
+    return res.formatter.badRequest({ message: error })
   }
 }
 
@@ -53,7 +53,7 @@ export const getItems = async (req: Request, res: Response) => {
       total: bodyRequest.search.term.length > 0 ? items.count : countAll.count
     })
   } catch (error: any) {
-    return res.formatter.badRequest({ error })
+    return res.formatter.badRequest({ message: error })
   }
 }
 
@@ -66,7 +66,7 @@ export const updateItemByPk = async (req: Request, res: Response) => {
     const itemUpdated = await service.updateItemByPk(id, itemRequest)
     return res.formatter.ok({ data: itemUpdated })
   } catch (error: any) {
-    return res.formatter.badRequest({ error })
+    return res.formatter.badRequest({ message: error })
   }
 }
 
@@ -79,7 +79,7 @@ export const updateItemByGarmentAccessoryID = async (req: Request, res: Response
     const itemUpdated = await service.updateItemByGarmentAccessoryID(garmentAccessoryID, itemRequest)
     return res.formatter.ok({ data: itemUpdated })
   } catch (error: any) {
-    return res.formatter.badRequest({ error })
+    return res.formatter.badRequest({ message: error })
   }
 }
 
@@ -90,7 +90,7 @@ export const updateItemsByGarmentAccessoryID = async (req: Request, res: Respons
     const updatedItems = await service.updateItemsBy({ field: 'garmentAccessoryID', id: garmentAccessoryID }, records)
     return res.formatter.ok({ data: updatedItems })
   } catch (error: any) {
-    return res.formatter.badRequest({ error })
+    return res.formatter.badRequest({ message: error })
   }
 }
 
@@ -100,7 +100,7 @@ export const deleteItemByPk = async (req: Request, res: Response) => {
     const destroyed = await service.deleteItemByPk(id)
     return res.formatter.ok({ message: destroyed.message })
   } catch (error: any) {
-    return res.formatter.badRequest({ error })
+    return res.formatter.badRequest({ message: error })
   }
 }
 
@@ -110,6 +110,6 @@ export const deleteItemByGarmentAccessoryID = async (req: Request, res: Response
     const destroyed = await service.deleteItemByGarmentAccessoryID(garmentAccessoryID)
     return res.formatter.ok({ message: destroyed.message })
   } catch (error: any) {
-    return res.formatter.badRequest({ error })
+    return res.formatter.badRequest({ message: error })
   }
 }

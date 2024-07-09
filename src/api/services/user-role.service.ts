@@ -1,6 +1,6 @@
 import { dynamicQuery } from '~/helpers/query'
 import UserRoleSchema, { UserRole } from '~/models/user-role.model'
-import { ErrorType, RequestBodyType } from '~/type'
+import { RequestBodyType } from '~/type'
 import RoleSchema from '../models/role.model'
 import UserSchema from '../models/user.model'
 
@@ -22,10 +22,7 @@ export const createNewItem = async (item: UserRole) => {
     })
     return itemFound
   } catch (error: any) {
-    throw {
-      error: 'Error create item',
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -36,10 +33,7 @@ export const getItemByPk = async (id: number) => {
     if (!itemFound) throw new Error(`Item not found`)
     return itemFound
   } catch (error: any) {
-    throw {
-      error: 'Error get item',
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -53,10 +47,7 @@ export const getItemByUserID = async (userID: number) => {
     if (!itemsFound) throw new Error(`Item not found`)
     return itemsFound
   } catch (error: any) {
-    throw {
-      error: 'Error get item by',
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -72,10 +63,7 @@ export const getItems = async (body: RequestBodyType) => {
     })
     return items
   } catch (error: any) {
-    throw {
-      error: 'Error get list',
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -88,10 +76,7 @@ export const updateItemByPk = async (id: number, itemToUpdate: UserRole) => {
     const itemUpdated = await UserRoleSchema.findByPk(itemFound.id, { include: [{ model: RoleSchema, as: 'role' }] })
     return itemUpdated
   } catch (error: any) {
-    throw {
-      error: 'Error update item',
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -103,10 +88,7 @@ export const updateItemByUserID = async (userID: number, itemToUpdate: UserRole)
     const itemUpdated = await UserRoleSchema.findByPk(itemFound.id, { include: [{ model: RoleSchema, as: 'role' }] })
     return itemUpdated
   } catch (error: any) {
-    throw {
-      error: 'Error update item by',
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -163,10 +145,7 @@ export const updateItemsBy = async (query: { field: string; id: number }, record
     // const updatedList = [...existingRecords.filter((record) => !recordsToDelete.includes(record)), ...itemsCreated]
     return updatedUserRoles
   } catch (error: any) {
-    throw {
-      error: 'Error update multiple item',
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -178,10 +157,7 @@ export const deleteItemByPk = async (id: number) => {
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw {
-      error: 'Error delete item',
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -193,9 +169,6 @@ export const deleteItemByUserID = async (userID: number) => {
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw {
-      error: 'Error delete item by',
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }

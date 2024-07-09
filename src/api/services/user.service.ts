@@ -2,7 +2,7 @@ import appConfig from '~/config/app.config'
 import { mailOptionToSendUserInfo, transporter } from '~/config/nodemailer.config'
 import { getItemsQuery } from '~/helpers/query'
 import UserSchema, { User } from '~/models/user.model'
-import { ErrorType, RequestBodyType } from '~/type'
+import { RequestBodyType } from '~/type'
 import TokenSchema from '../models/token.model'
 import UserRoleSchema from '../models/user-role.model'
 
@@ -16,10 +16,7 @@ export const createNewItem = async (item: User) => {
     await transporter.sendMail(mailOptionToSendUserInfo(newUser.email, newUser))
     return newUser
   } catch (error: any) {
-    throw {
-      error: `Error create item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -31,10 +28,7 @@ export const getItemByPk = async (id: number) => {
     delete itemFound.dataValues.password
     return itemFound.dataValues
   } catch (error: any) {
-    throw {
-      error: `Error get item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -44,10 +38,7 @@ export const getItems = async (body: RequestBodyType) => {
     const items = await UserSchema.findAndCountAll(getItemsQuery(body))
     return items
   } catch (error: any) {
-    throw {
-      error: `Error get list`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -59,10 +50,7 @@ export const updateItemByPk = async (id: number, itemToUpdate: User) => {
     await itemFound.update(itemToUpdate)
     return itemToUpdate
   } catch (error: any) {
-    throw {
-      error: `Error update item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -80,10 +68,7 @@ export const updateItems = async (itemsUpdate: User[]) => {
     )
     return updatedItems
   } catch (error: any) {
-    throw {
-      error: `Error update multiple item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
 
@@ -110,9 +95,6 @@ export const deleteItemByPk = async (id: number) => {
     })
     return { message: 'Deleted successfully' }
   } catch (error: any) {
-    throw {
-      error: `Error delete item`,
-      errorDetail: `${error.message}`
-    } as ErrorType
+    throw `${error.message}`
   }
 }
