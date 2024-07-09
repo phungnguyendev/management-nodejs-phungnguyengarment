@@ -96,7 +96,7 @@ export const updateItems = async (itemsUpdate: Product[]) => {
 export const deleteItemByPk = async (id: number) => {
   try {
     const itemFound = await ProductSchema.findByPk(id)
-    if (!itemFound) throw new Error(`Item not found`)
+    if (!itemFound) throw new Error(`Product not found`)
     // ProductColor, ProductGroup, PrintablePlace, Importation, SampleSewing, GarmentAccessory, CuttingGroup, SewingLine, Completion
 
     // item
@@ -113,9 +113,7 @@ export const deleteItemByPk = async (id: number) => {
 
     // items
     const importationsFound = await ImportationSchema.findAll({ where: { productID: id } })
-    if (importationsFound.length > 0) {
-      importationService.deleteItemsByProductID(id)
-    }
+    if (importationsFound.length > 0) await importationService.deleteItemsByProductID(id)
 
     // item
     const sampleSewingFound = await SampleSewingSchema.findOne({ where: { productID: id } })
@@ -140,6 +138,7 @@ export const deleteItemByPk = async (id: number) => {
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
+    console.log(error)
     throw `${error.message}`
   }
 }

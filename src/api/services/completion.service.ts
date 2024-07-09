@@ -104,7 +104,7 @@ export const deleteItemByPk = async (id: number) => {
 export const deleteItemByProductID = async (productID: number) => {
   try {
     const itemFound = await CompletionSchema.findOne({ where: { productID } })
-    if (!itemFound) throw new Error(`Item not found`)
+    if (!itemFound) throw new Error(`Completion item not found`)
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
   } catch (error: any) {
