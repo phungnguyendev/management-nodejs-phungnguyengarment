@@ -1,9 +1,8 @@
 import { dynamicQuery } from '~/helpers/query'
 import GarmentAccessoryNoteSchema, { GarmentAccessoryNote } from '~/models/garment-accessory-note.model'
-import { ErrorType, RequestBodyType } from '~/type'
+import { RequestBodyType } from '~/type'
 import AccessoryNoteSchema from '../models/accessory-note.model'
 import GarmentAccessorySchema from '../models/garment-accessory.model'
-import logging from '../utils/logging'
 
 const NAMESPACE = 'services/garment-accessory-note'
 

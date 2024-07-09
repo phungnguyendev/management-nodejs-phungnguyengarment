@@ -1,6 +1,6 @@
 import { getItemsQuery } from '~/helpers/query'
 import ImportationSchema, { Importation } from '~/models/importation.model'
-import { ErrorType, RequestBodyType } from '~/type'
+import { RequestBodyType } from '~/type'
 
 const NAMESPACE = 'services/importation'
 
@@ -104,6 +104,20 @@ export const deleteItemByProductID = async (productID: number) => {
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
+  } catch (error: any) {
+    throw `${error.message}`
+  }
+}
+
+export const deleteItemsByProductID = async (productID: number) => {
+  try {
+    const itemsFound = await ImportationSchema.findAll({ where: { productID } })
+    if (itemsFound.length > 0) {
+      itemsFound.forEach(async (item) => {
+        await item.destroy()
+      })
+    }
+    return { message: 'Deleted all item successfully' }
   } catch (error: any) {
     throw `${error.message}`
   }

@@ -209,3 +209,17 @@ export const deleteItemByProductID = async (productID: number) => {
     throw `${error.message}`
   }
 }
+
+export const deleteItemsByProductID = async (productID: number) => {
+  try {
+    const itemsFound = await SewingLineDeliverySchema.findAll({ where: { productID } })
+    if (itemsFound.length > 0) {
+      itemsFound.forEach(async (item) => {
+        await item.destroy()
+      })
+    }
+    return { message: 'Deleted all item successfully' }
+  } catch (error: any) {
+    throw `${error.message}`
+  }
+}

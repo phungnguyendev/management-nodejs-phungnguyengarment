@@ -1,5 +1,5 @@
 import GarmentAccessorySchema, { GarmentAccessory } from '~/models/garment-accessory.model'
-import { ErrorType, RequestBodyType } from '~/type'
+import { RequestBodyType } from '~/type'
 import { dynamicQuery } from '../helpers/query'
 import GarmentAccessoryNoteSchema from '../models/garment-accessory-note.model'
 import ProductSchema from '../models/product.model'
@@ -67,7 +67,7 @@ export const updateItemByPk = async (id: number, itemToUpdate: GarmentAccessory)
     if (!itemFound) throw new Error(`Item not found`)
     await itemFound.update(itemToUpdate)
     const itemUpdated = await GarmentAccessorySchema.findByPk(id, {
-      include: [{ model: ProductSchema, as  : 'product' }]
+      include: [{ model: ProductSchema, as: 'product' }]
     })
     return itemUpdated
   } catch (error: any) {

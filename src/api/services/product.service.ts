@@ -1,5 +1,13 @@
 import { getItemsQuery } from '~/helpers/query'
 import ProductSchema, { Product } from '~/models/product.model'
+import * as completionService from '~/services/completion.service'
+import * as cuttingGroupService from '~/services/cutting-group.service'
+import * as garmentAccessoryService from '~/services/garment-accessory.service'
+import * as importationService from '~/services/importation.service'
+import * as printablePlaceService from '~/services/printable-place.service'
+import * as productGroupService from '~/services/product-group.service'
+import * as sampleSewingService from '~/services/sample-sewing.service'
+import * as sewingLineDeliveryService from '~/services/sewing-line-delivery.service'
 import { RequestBodyType } from '~/type'
 import CompletionSchema from '../models/completion.model'
 import CuttingGroupSchema from '../models/cutting-group.model'
@@ -93,47 +101,41 @@ export const deleteItemByPk = async (id: number) => {
 
     // item
     const productColorFound = await ProductColorSchema.findOne({ where: { productID: id } })
-    if (productColorFound) await productColorFound.destroy()
+    if (productColorFound) await completionService.deleteItemByProductID(id)
 
     // item
     const productGroupFound = await ProductGroupSchema.findOne({ where: { productID: id } })
-    if (productGroupFound) await productGroupFound.destroy()
+    if (productGroupFound) await productGroupService.deleteItemByProductID(id)
 
     // item
     const printablePlaceFound = await PrintablePlaceSchema.findOne({ where: { productID: id } })
-    if (printablePlaceFound) await printablePlaceFound.destroy()
+    if (printablePlaceFound) await printablePlaceService.deleteItemByProductID(id)
 
     // items
     const importationsFound = await ImportationSchema.findAll({ where: { productID: id } })
     if (importationsFound.length > 0) {
-      importationsFound.forEach(async (item) => {
-        await item.destroy()
-      })
+      importationService.deleteItemsByProductID(id)
     }
 
     // item
     const sampleSewingFound = await SampleSewingSchema.findOne({ where: { productID: id } })
-    if (sampleSewingFound) await sampleSewingFound.destroy()
+    if (sampleSewingFound) await sampleSewingService.deleteItemByProductID(id)
 
     // item
     const garmentAccessoryFound = await GarmentAccessorySchema.findOne({ where: { productID: id } })
-    if (garmentAccessoryFound) await garmentAccessoryFound.destroy()
+    if (garmentAccessoryFound) await garmentAccessoryService.deleteItemByProductID(id)
 
     // item
     const cuttingGroupFound = await CuttingGroupSchema.findOne({ where: { productID: id } })
-    if (cuttingGroupFound) await cuttingGroupFound.destroy()
+    if (cuttingGroupFound) await cuttingGroupService.deleteItemByProductID(id)
 
     // items
-    const sewingLineDeliveryFound = await SewingLineDeliverySchema.findAll({ where: { productID: id } })
-    if (sewingLineDeliveryFound.length > 0) {
-      sewingLineDeliveryFound.forEach(async (item) => {
-        await item.destroy()
-      })
-    }
+    const sewingLineDeliveriesFound = await SewingLineDeliverySchema.findAll({ where: { productID: id } })
+    if (sewingLineDeliveriesFound.length > 0) await sewingLineDeliveryService.deleteItemsByProductID(id)
 
     // item
     const completionFound = await CompletionSchema.findOne({ where: { productID: id } })
-    if (completionFound) await completionFound.destroy()
+    if (completionFound) await completionService.deleteItemByProductID(id)
 
     await itemFound.destroy()
     return { message: 'Deleted successfully' }
