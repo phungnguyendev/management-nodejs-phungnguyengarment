@@ -41,7 +41,7 @@ export default class SewingLineDeliverySchema extends Model<SewingLineDelivery> 
   @Column({ type: STRING, field: 'expired_date' })
   declare expiredDate: string
 
-  @Column({ type: STRING, field: 'status' })
+  @Column({ type: STRING(45), field: 'status' })
   declare status: string
 
   @BelongsTo(() => SewingLineSchema)

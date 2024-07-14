@@ -33,7 +33,7 @@ export default class GarmentAccessorySchema extends Model<GarmentAccessory> {
   @Column({ type: STRING, field: 'passing_delivery_date' })
   declare passingDeliveryDate: string
 
-  @Column({ type: STRING, field: 'status' })
+  @Column({ type: STRING(45), field: 'status' })
   declare status: string
 
   @Column({ type: BOOLEAN, field: 'sync_status' })

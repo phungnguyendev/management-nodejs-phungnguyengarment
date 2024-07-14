@@ -57,6 +57,6 @@ export default class UserSchema extends Model<User> {
   @Column({ type: STRING, field: 'birthday' })
   declare birthday: string
 
-  @Column({ type: STRING, field: 'status' })
+  @Column({ type: STRING(45), field: 'status' })
   declare status: ItemStatusType
 }

@@ -29,7 +29,7 @@ export default class GarmentAccessoryNoteSchema extends Model<GarmentAccessoryNo
   @ForeignKey(() => GarmentAccessorySchema)
   declare garmentAccessoryID: number
 
-  @Column({ type: STRING, field: 'status' })
+  @Column({ type: STRING(45), field: 'status' })
   declare status: string
 
   @BelongsTo(() => AccessoryNoteSchema)

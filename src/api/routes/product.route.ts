@@ -8,9 +8,9 @@ router.post(
   '/',
   validationRules([
     { field: 'productCode', type: 'string', location: 'body' },
-    { field: 'quantityPO', type: 'int', location: 'body' },
-    { field: 'dateInputNPL', type: 'date', location: 'body' },
-    { field: 'dateOutputFCR', type: 'date', location: 'body' }
+    { field: 'quantityPO', type: 'int', location: 'body' }
+    // { field: 'dateInputNPL', type: 'date', location: 'body' },
+    // { field: 'dateOutputFCR', type: 'date', location: 'body' }
   ]),
   controller.createNewItem
 )

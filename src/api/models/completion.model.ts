@@ -43,7 +43,7 @@ export default class CompletionSchema extends Model<Completion> {
   @Column({ type: STRING, field: 'pass_fi_date' })
   declare passFIDate: string
 
-  @Column({ type: STRING, field: 'status' })
+  @Column({ type: STRING(45), field: 'status' })
   declare status: string
 
   @BelongsTo(() => ProductSchema)

@@ -44,7 +44,10 @@ export const getItems = async (req: Request, res: Response, next: NextFunction) 
       ...req.body
     }
     const items = await service.getItems(bodyRequest)
-    const countAll = await service.getItems({ ...bodyRequest, filter: { status: 'active', field: 'id', items: [-1] } })
+    const countAll = await service.getItems({
+      ...bodyRequest,
+      filter: { status: ['active'], field: 'id', items: [-1] }
+    })
     return res.formatter.ok({
       data: items.rows,
       length: items.count,
@@ -65,6 +68,17 @@ export const updateItemByPk = async (req: Request, res: Response, next: NextFunc
     }
     const itemUpdated = await service.updateItemByPk(id, itemRequest)
     return res.formatter.ok({ data: itemUpdated })
+  } catch (error: any) {
+    return res.formatter.badRequest({ message: error })
+  }
+}
+
+export const updateItemsByProductID = async (req: Request, res: Response) => {
+  try {
+    const productID = Number(req.params.productID)
+    const records = req.body as PrintablePlace[]
+    const updatedItems = await service.updateItemsBy({ field: 'productID', id: productID }, records)
+    return res.formatter.ok({ data: updatedItems })
   } catch (error: any) {
     return res.formatter.badRequest({ message: error })
   }

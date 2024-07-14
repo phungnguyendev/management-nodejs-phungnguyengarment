@@ -55,7 +55,7 @@ export default class SampleSewingSchema extends Model<SampleSewing> {
   @Column({ type: STRING, field: 'date_submission_fifth_time' })
   declare dateSubmissionFifthTime: string
 
-  @Column({ type: STRING, field: 'status' })
+  @Column({ type: STRING(45), field: 'status' })
   declare status: string
 
   @BelongsTo(() => ProductSchema)

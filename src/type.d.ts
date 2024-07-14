@@ -13,7 +13,7 @@ export type UserRoleType =
 
 export type RequestBodyType = {
   filter: {
-    status: ItemStatusType
+    status: ItemStatusType[]
     field: string
     items: number[] // items: mảng id : default -1: Lấy tất cả post
   }

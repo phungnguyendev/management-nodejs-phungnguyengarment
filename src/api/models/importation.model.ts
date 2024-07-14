@@ -25,7 +25,7 @@ export default class ImportationSchema extends Model<Importation> {
   @ForeignKey(() => ProductSchema)
   declare productID: number
 
-  @Column({ type: STRING, field: 'status' })
+  @Column({ type: STRING(45), field: 'status' })
   declare status: string
 
   @Column({ type: FLOAT, field: 'quantity' })

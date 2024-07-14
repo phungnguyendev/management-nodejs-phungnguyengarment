@@ -34,7 +34,10 @@ export const getItems = async (req: Request, res: Response, next: NextFunction) 
       ...req.body
     }
     const items = await service.getItems(bodyRequest)
-    const countAll = await service.getItems({ ...bodyRequest, filter: { status: 'active', field: 'id', items: [-1] } })
+    const countAll = await service.getItems({
+      ...bodyRequest,
+      filter: { status: ['active'], field: 'id', items: [-1] }
+    })
     return res.formatter.ok({
       data: items.rows,
       length: items.count,

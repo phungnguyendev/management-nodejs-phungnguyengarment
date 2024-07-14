@@ -1,6 +1,5 @@
-import { getItemsQuery } from '~/helpers/query'
+import { dynamicQuery } from '~/helpers/query'
 import ProductSchema, { Product } from '~/models/product.model'
-import * as completionService from '~/services/completion.service'
 import * as cuttingGroupService from '~/services/cutting-group.service'
 import * as garmentAccessoryService from '~/services/garment-accessory.service'
 import * as importationService from '~/services/importation.service'
@@ -56,7 +55,12 @@ export const getItemByProductCode = async (productCode: string) => {
 // Get all
 export const getItems = async (body: RequestBodyType) => {
   try {
-    const items = await ProductSchema.findAndCountAll(getItemsQuery(body))
+    const items = await ProductSchema.findAndCountAll({
+      offset: (Number(body.paginator.page) - 1) * Number(body.paginator.pageSize),
+      limit: body.paginator.pageSize === -1 ? undefined : body.paginator.pageSize,
+      order: [[body.sorting.column, body.sorting.direction]],
+      where: dynamicQuery<Product>(body)
+    })
     return items
   } catch (error: any) {
     throw `${error.message}`

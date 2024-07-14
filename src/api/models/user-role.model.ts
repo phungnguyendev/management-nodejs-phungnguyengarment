@@ -29,7 +29,7 @@ export default class UserRoleSchema extends Model<UserRole> {
   @ForeignKey(() => RoleSchema)
   declare roleID: number
 
-  @Column({ type: STRING, field: 'status' })
+  @Column({ type: STRING(45), field: 'status' })
   declare status: ItemStatusType
 
   @BelongsTo(() => UserSchema)

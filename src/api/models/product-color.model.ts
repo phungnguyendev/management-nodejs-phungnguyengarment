@@ -29,7 +29,7 @@ export default class ProductColorSchema extends Model<ProductColor> {
   @ForeignKey(() => ProductSchema)
   declare productID: number
 
-  @Column({ type: STRING, field: 'status' })
+  @Column({ type: STRING(45), field: 'status' })
   declare status: string
 
   @BelongsTo(() => ProductSchema)

@@ -25,6 +25,6 @@ export default class AccessoryNoteSchema extends Model<AccessoryNote> {
   @Column({ type: STRING, field: 'summary' })
   declare summary: string
 
-  @Column({ type: STRING, field: 'status' })
+  @Column({ type: STRING(45), field: 'status' })
   declare status: string
 }

@@ -25,6 +25,6 @@ export default class ColorSchema extends Model<Color> {
   @Column({ type: STRING, field: 'hex_color' })
   declare hexColor: string
 
-  @Column({ type: STRING, field: 'status' })
+  @Column({ type: STRING(45), field: 'status' })
   declare status: string
 }

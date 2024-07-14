@@ -21,6 +21,6 @@ export default class PrintSchema extends Model<Print> {
   @Column({ type: STRING, field: 'name' })
   declare name: string
 
-  @Column({ type: STRING, field: 'status' })
+  @Column({ type: STRING(45), field: 'status' })
   declare status: string
 }

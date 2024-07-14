@@ -6,7 +6,7 @@ const dynamicQuery = <T>(params: RequestBodyType): WhereOptions<T> | undefined =
 
   // Kiểm tra và thêm điều kiện cho mỗi tham số cần truy vấn
   if (params.filter.items.includes(-1)) {
-    conditions = { ...conditions, status: params.filter.status }
+    conditions = { ...conditions, status: { [Op.or]: params.filter.status } }
   } else {
     conditions = { ...conditions, [params.filter.field]: { [Op.in]: params.filter.items } }
   }

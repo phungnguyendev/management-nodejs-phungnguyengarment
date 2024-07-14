@@ -38,7 +38,7 @@ export default class DateSubmissionSchema extends Model<DateSubmission> {
   @Column({ type: STRING, field: 'date_approval_so' })
   declare dateApprovalSO: string
 
-  @Column({ type: STRING, field: 'status' })
+  @Column({ type: STRING(45), field: 'status' })
   declare status: string
 
   @BelongsTo(() => SampleSewingSchema)

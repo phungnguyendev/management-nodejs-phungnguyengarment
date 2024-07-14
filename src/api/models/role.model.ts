@@ -29,6 +29,6 @@ export default class RoleSchema extends Model<Role> {
   @Column({ type: STRING, field: 'desc' })
   declare desc: string
 
-  @Column({ type: STRING, field: 'status' })
+  @Column({ type: STRING(45), field: 'status' })
   declare status: ItemStatusType
 }

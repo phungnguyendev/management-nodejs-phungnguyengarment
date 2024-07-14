@@ -27,7 +27,7 @@ export default class ProductSchema extends Model<Product> {
   @Column({ type: FLOAT, field: 'quantity_po' })
   declare quantityPO: number
 
-  @Column({ type: STRING, field: 'status' })
+  @Column({ type: STRING(45), field: 'status' })
   declare status: string
 
   @Column({ type: STRING, field: 'date_input_npl' })

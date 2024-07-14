@@ -1,7 +1,8 @@
 import { dynamicQuery } from '~/helpers/query'
 import PrintablePlaceSchema, { PrintablePlace } from '~/models/printable-place.model'
-import { ErrorType, RequestBodyType } from '~/type'
+import { RequestBodyType } from '~/type'
 import PrintSchema from '../models/print.model'
+import ProductSchema from '../models/product.model'
 
 const NAMESPACE = 'services/printable-place'
 
@@ -87,19 +88,59 @@ export const updateItemByProductID = async (productID: number, itemToUpdate: Pri
   }
 }
 
-export const updateItems = async (itemsUpdate: PrintablePlace[]) => {
+export const updateItemsBy = async (
+  query: { field: string; id: number },
+  updatedRecords: PrintablePlace[]
+): Promise<PrintablePlace[] | undefined | any> => {
   try {
-    const updatedItems = await Promise.all(
-      itemsUpdate.map(async (item) => {
-        const user = await PrintablePlaceSchema.findByPk(item.id, { include: [{ model: PrintSchema, as: 'print' }] })
-        if (!user) {
-          throw new Error(`Item with id ${item.id} not found`)
-        }
-        await user.update(item)
-        return user
-      })
+    const existingRecords = await PrintablePlaceSchema.findAll({
+      where: {
+        [query.field]: query.id
+      }
+    })
+
+    // Tìm các bản ghi cần xoá
+    const recordsToDelete = existingRecords.filter(
+      (existingRecord) => !updatedRecords.some((updatedRecord) => updatedRecord.printID === existingRecord.printID)
     )
-    return updatedItems
+
+    // Tìm các bản ghi cần thêm mới
+    const recordsToAdd = updatedRecords.filter(
+      (updatedRecord) => !existingRecords.some((existingRecord) => existingRecord.printID === updatedRecord.printID)
+    )
+
+    if (recordsToAdd.length > 0) {
+      // Thêm mới các bảng ghi mới
+      await PrintablePlaceSchema.bulkCreate(
+        recordsToAdd.map((item) => {
+          return { ...item, status: 'active' } as PrintablePlace
+        })
+      )
+    }
+
+    if (recordsToDelete.length > 0) {
+      // Xoá các bản ghi không còn trong danh sách
+      await PrintablePlaceSchema.destroy({
+        where: {
+          printID: recordsToDelete.map((record) => record.printID),
+          productID: query.id
+        }
+      })
+    }
+
+    const itemsUpdated = await PrintablePlaceSchema.findAll({
+      where: {
+        [query.field]: query.id,
+        status: 'active'
+      },
+      include: [
+        { model: ProductSchema, as: 'product' },
+        { model: PrintSchema, as: 'print' }
+      ]
+    })
+    // Trả về danh sách cập nhật sau xử lý
+    // const updatedList = [...existingRecords.filter((record) => !recordsToDelete.includes(record), ...itemsCreated)]
+    return itemsUpdated
   } catch (error: any) {
     throw `${error.message}`
   }
