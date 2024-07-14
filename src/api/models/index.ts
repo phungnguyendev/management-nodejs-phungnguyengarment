@@ -22,7 +22,6 @@ import SewingLineSchema from './sewing-line.model'
 import TokenSchema from './token.model'
 import UserRoleSchema from './user-role.model'
 import UserSchema from './user.model'
-import CutGroupEmbroideringSchema from './cut-group-embroidering.model'
 
 const PATH = 'model/index'
 
@@ -48,7 +47,6 @@ sequelize?.addModels([
   GarmentAccessoryNoteSchema,
   SewingLineDeliverySchema,
   CuttingGroupSchema,
-  CutGroupEmbroideringSchema,
   CompletionSchema
 ])
 
