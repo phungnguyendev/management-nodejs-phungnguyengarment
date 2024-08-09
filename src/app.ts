@@ -13,8 +13,11 @@ const app = express()
 const corsOptions: CorsOptions = {
   origin: [
     'https://management.phungnguyengarment.vn',
+    'http://management.phungnguyengarment.vn',
+    'http://www.management.phungnguyengarment.vn',
     'https://www.management.phungnguyengarment.vn',
-    'http://localhost:5173'
+    'http://27.71.26.53:5000',
+    'https://27.71.26.53:5000'
   ]
 }
 // Accept json body request
