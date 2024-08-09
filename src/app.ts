@@ -15,10 +15,10 @@ const corsOptions: CorsOptions = {
     'https://management.phungnguyengarment.vn',
     'http://management.phungnguyengarment.vn',
     'http://www.management.phungnguyengarment.vn',
-    'https://www.management.phungnguyengarment.vn',
-    'http://27.71.26.53:5000',
-    'https://27.71.26.53:5000',
-    'http://localhost:5000'
+    'https://www.management.phungnguyengarment.vn'
+    // 'http://27.71.26.53:5000',
+    // 'https://27.71.26.53:5000',
+    // 'http://localhost:5000'
   ]
 }
 // Accept json body request
