@@ -1,6 +1,7 @@
 import express from 'express'
 import routes from '~/routes/index'
 import sequelize from './api/models'
+import { responseEnhancer } from './api/middleware/express-formatter'
 
 const app = express()
 
@@ -24,7 +25,7 @@ const app = express()
 // // (cors) Provide some options Headers for accept others localhost to allow request
 // app.use(cors(corsOptions))
 // // Handle custom formatter response express (middleware)
-// app.use(responseEnhancer())
+app.use(responseEnhancer())
 app.use('/api', routes)
 // app.use(errorHandler)
 
