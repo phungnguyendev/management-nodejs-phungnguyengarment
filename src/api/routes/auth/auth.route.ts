@@ -7,7 +7,7 @@ const router = Router()
 router.post(
   '/login',
   validationRules([
-    { field: 'email', type: 'email', location: 'body' },
+    { field: 'email', type: 'string', location: 'body' },
     { field: 'password', type: 'string', location: 'body' }
   ]),
   controller.login
