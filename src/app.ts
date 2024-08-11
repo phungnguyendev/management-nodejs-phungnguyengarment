@@ -13,7 +13,9 @@ const app = express()
 const corsOptions: CorsOptions = {
   origin: [
     'https://management.phungnguyengarment.vn',
+    'https://www.management.phungnguyengarment.vn',
     'http://management.phungnguyengarment.vn',
+    'https://www.management.phungnguyengarment.vn',
     'http://27.71.26.53:8000',
     'http://localhost:8000'
   ]
